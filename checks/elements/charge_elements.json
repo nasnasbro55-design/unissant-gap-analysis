@@ -1,0 +1,37 @@
+{
+  "212(a)(6)(A)(i)": {
+    "name": "Present without admission or parole",
+    "description": "Alien present in the US without being admitted or paroled, or who arrived at a place not designated by an immigration officer",
+    "required_facts": [
+      "subject_identity",
+      "country_of_citizenship",
+      "manner_of_entry",
+      "place_of_entry",
+      "admitted_or_paroled_status"
+    ],
+    "source": "INA 212(a)(6)(A)(i); USCIS Policy Manual Vol. 7, Part L, Ch. 3"
+  },
+  "212(a)(9)(A)(i)": {
+    "name": "Prior removal, reentry without admission",
+    "description": "Alien previously ordered removed who entered or attempted to enter without being admitted",
+    "required_facts": [
+      "subject_identity",
+      "prior_removal_order",
+      "prior_removal_date",
+      "reentry_or_attempted_reentry",
+      "admitted_status_at_reentry"
+    ],
+    "source": "INA 212(a)(9)(A)(i); USCIS Policy Manual Vol. 7, Part L, Ch. 3"
+  },
+  "212(a)(6)(C)(i)": {
+    "name": "Misrepresentation or fraud",
+    "description": "Alien who sought admission or benefit through fraud or willful misrepresentation of a material fact",
+    "required_facts": [
+      "subject_identity",
+      "misrepresentation_or_fraud_act",
+      "material_fact_misrepresented",
+      "benefit_or_admission_sought"
+    ],
+    "source": "INA 212(a)(6)(C)(i); USCIS Policy Manual Vol. 7, Part L, Ch. 3"
+  }
+}
