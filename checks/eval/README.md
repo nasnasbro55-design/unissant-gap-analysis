@@ -34,5 +34,5 @@ the real pipeline and scores it:
 - `--repeat N` runs the whole set N times and lists the cases whose gap report changed
   between runs (the model's extraction is not perfectly repeatable, so measure it).
 - Failed cases print the facts the model extracted and any claims dropped as ungrounded.
-- Settings come from the environment: `PROMPT_VERSION` (v2 default, v3 is the newer
+- Settings come from the environment: `PROMPT_VERSION` (v3 default; v2 is the older
   prompt) and `REASONING_EFFORT` (low default; `default` leaves the server's setting).

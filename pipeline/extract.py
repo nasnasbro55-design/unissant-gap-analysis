@@ -1,7 +1,7 @@
 import json, os, re, pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-VERSION = os.environ.get("PROMPT_VERSION", "v2")
+VERSION = os.environ.get("PROMPT_VERSION", "v3")
 FACTS = json.loads((ROOT / "checks/elements/fact_definitions.json").read_text())
 SYSTEM = (ROOT / f"pipeline/prompts/extract_{VERSION}.txt").read_text().replace("{fact_definitions}", "\n".join(f"- {k}: {v}" for k, v in FACTS.items()))
 ABBR = re.compile(r"(?:^|\s)(?:[A-Z]|Mr|Mrs|Ms|Dr|Sr|Jr|St|Subj)\.$")
