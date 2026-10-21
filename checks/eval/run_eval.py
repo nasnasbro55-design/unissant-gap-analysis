@@ -35,7 +35,7 @@ if __name__ == "__main__":
     ap.add_argument("--repeat", type=int, default=1, help="run the whole set N times and report which cases changed between runs")
     ap.add_argument("--only", default="", help="comma-separated case ids")
     a = ap.parse_args()
-    cases = [json.loads(l) for l in (HERE / "cases.jsonl").read_text().splitlines() if l.strip()]
+    cases = [json.loads(l) for f in sorted(HERE.glob("cases*.jsonl")) for l in f.read_text().splitlines() if l.strip()]
     cases = [c for c in cases if not a.only or c["id"] in a.only.split(",")]
     t0 = time.time()
     with ThreadPoolExecutor(a.workers) as ex:

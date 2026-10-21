@@ -1,6 +1,8 @@
 # Eval harness
 
-`cases.jsonl` holds one test case per line. `run_eval.py` runs every case through
+`cases.jsonl` holds one test case per line. Every file named `cases*.jsonl` in this folder is loaded,
+so each author can keep their own (for example `cases_huy.jsonl`) and use ids with their own
+prefix (`h01`, `h02`, ...). Scores are also broken down by author. `run_eval.py` runs every case through
 the real pipeline and scores it:
 
     python3 checks/eval/run_eval.py                      # all cases, one at a time
@@ -36,3 +38,7 @@ the real pipeline and scores it:
 - Failed cases print the facts the model extracted and any claims dropped as ungrounded.
 - Settings come from the environment: `PROMPT_VERSION` (v3 default; v2 is the older
   prompt) and `REASONING_EFFORT` (low default; `default` leaves the server's setting).
+
+- A narrative whose facts contradict the charge it cites (for example it says the subject was
+  admitted on a visa, but cites unlawful presence without admission) expects `human_review`
+  with `missing` empty. The pipeline does not catch these yet, so they should fail for now.
