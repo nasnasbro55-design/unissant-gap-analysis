@@ -1,0 +1,14 @@
+{
+  "subject_identity": "The subject is named or identified (a name or placeholder name counts).",
+  "country_of_citizenship": "The subject's country of citizenship or nationality is stated.",
+  "manner_of_entry": "How the subject entered the United States (for example without inspection, or at a place not designated for entry).",
+  "place_of_entry": "The specific place where the subject entered (a port of entry, city, or named border location). A general statement that the place was 'not designated' does NOT count.",
+  "admitted_or_paroled_status": "Whether the subject was or was not admitted or paroled.",
+  "prior_removal_order": "The subject was previously ordered removed, deported, or excluded.",
+  "prior_removal_date": "The date (at least month and year) of the prior removal order or removal.",
+  "reentry_or_attempted_reentry": "The subject entered or attempted to enter the United States after the prior removal.",
+  "admitted_status_at_reentry": "Whether the subject was admitted at the time of that reentry.",
+  "misrepresentation_or_fraud_act": "A specific act of fraud or misrepresentation is described.",
+  "material_fact_misrepresented": "The material fact that was misrepresented is identified.",
+  "benefit_or_admission_sought": "The immigration benefit or admission the subject sought is identified."
+}
