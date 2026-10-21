@@ -24,14 +24,18 @@ def gap_report(sents, claims):
     return report
 
 if __name__ == "__main__":
+    from llm_client import chat
     text, runs, reports = (ROOT / "data/sample_narrative.txt").read_text(), int(sys.argv[1]) if len(sys.argv) > 1 else 1, []
     for i in range(runs):
         t = time.time()
         sents, claims, dropped = extract(text)
         reports.append(json.dumps(gap_report(sents, claims), sort_keys=True, indent=2))
+        u = getattr(chat, "usage", None)
         print(f"--- run {i + 1}: {time.time() - t:.1f}s, {len(claims)} claims kept, {len(dropped)} dropped (not grounded in the text)")
+        if u:
+            print(f"  tokens: {u.prompt_tokens} in, {u.completion_tokens} out ({getattr(u.completion_tokens_details, 'reasoning_tokens', None)} of them reasoning)")
         for c in claims:
-            print(f"  {c['sentence_ids']} {c['fact_type']} = {c['value']!r} [{c['confidence']}]")
+            print(f"  {c['sentence_ids']} {c['fact_type']} [{c['confidence']}] {c['quote']!r}")
         for c in dropped:
             print(f"  DROPPED: {c}")
     print("\n" + reports[-1])

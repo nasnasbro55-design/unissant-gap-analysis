@@ -1,8 +1,8 @@
-import json, re, pathlib
+import json, os, re, pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 FACTS = json.loads((ROOT / "checks/elements/fact_definitions.json").read_text())
-SYSTEM = (ROOT / "pipeline/prompts/extract_v1.txt").read_text().replace("{fact_definitions}", "\n".join(f"- {k}: {v}" for k, v in FACTS.items()))
+SYSTEM = (ROOT / f"pipeline/prompts/extract_{os.environ.get('PROMPT_VERSION', 'v2')}.txt").read_text().replace("{fact_definitions}", "\n".join(f"- {k}: {v}" for k, v in FACTS.items()))
 norm = lambda s: " ".join(s.split()).lower()
 
 def split_sentences(text):
@@ -16,10 +16,11 @@ def extract(text, chat=None):
         from llm_client import chat
     sents = split_sentences(text)
     msgs = [{"role": "system", "content": SYSTEM}, {"role": "user", "content": "<narrative>\n" + "\n".join(f"{k}: {v}" for k, v in sents.items()) + "\n</narrative>"}]
+    kw = {"temperature": 0, **({"reasoning_effort": os.environ["REASONING_EFFORT"]} if os.environ.get("REASONING_EFFORT") else {})}
     try:
-        raw = chat(msgs, temperature=0, response_format={"type": "json_object"})
+        raw = chat(msgs, response_format={"type": "json_object"}, **kw)
     except Exception:
-        raw = chat(msgs, temperature=0)
+        raw = chat(msgs, **kw)
     m = re.search(r"\{.*\}", raw or "", re.S)
     if not m:
         raise ValueError("model returned no JSON: " + (raw or "")[:200])
