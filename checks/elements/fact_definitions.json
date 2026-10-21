@@ -10,5 +10,8 @@
   "admitted_status_at_reentry": "Whether the subject was admitted at the time of that reentry.",
   "misrepresentation_or_fraud_act": "A specific act of fraud or misrepresentation is described.",
   "material_fact_misrepresented": "The material fact that was misrepresented is identified.",
-  "benefit_or_admission_sought": "The immigration benefit or admission the subject sought is identified."
+  "benefit_or_admission_sought": "The immigration benefit or admission the subject sought is identified.",
+  "stated_lawful_admission": "The text says the subject WAS lawfully inspected and admitted, or paroled, at the entry being described (for example admitted on a visa). Do NOT use this for an earlier admission followed by a later unlawful entry, or for a statement about another person.",
+  "no_prior_removal_stated": "The text says the subject has no prior removal order or was never removed.",
+  "truthful_disclosure_stated": "The text says the subject made no misrepresentation, or that the subject's documents and statements were genuine and truthful."
 }
