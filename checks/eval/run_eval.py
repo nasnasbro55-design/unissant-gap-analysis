@@ -10,9 +10,9 @@ def run_case(c):
     t = time.time()
     try:
         sents, claims, dropped = extract(c["narrative"])
-        return {"report": gap_report(sents, claims), "dropped": len(dropped), "secs": time.time() - t}
+        return {"report": gap_report(sents, claims), "claims": claims, "dropped": dropped, "secs": time.time() - t}
     except Exception as e:
-        return {"error": repr(e), "secs": time.time() - t, "dropped": 0}
+        return {"error": repr(e), "claims": [], "dropped": [], "secs": time.time() - t}
 
 def score(c, r):
     tp = fn = fp = 0
@@ -32,14 +32,15 @@ def score(c, r):
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--workers", type=int, default=1, help="requests in flight at once (use 3+ to test concurrency)")
+    ap.add_argument("--repeat", type=int, default=1, help="run the whole set N times and report which cases changed between runs")
     ap.add_argument("--only", default="", help="comma-separated case ids")
     a = ap.parse_args()
     cases = [json.loads(l) for l in (HERE / "cases.jsonl").read_text().splitlines() if l.strip()]
     cases = [c for c in cases if not a.only or c["id"] in a.only.split(",")]
     t0 = time.time()
     with ThreadPoolExecutor(a.workers) as ex:
-        results = list(ex.map(run_case, cases))
-    wall = time.time() - t0
+        runs = [list(ex.map(run_case, cases)) for _ in range(a.repeat)]
+    wall, results = time.time() - t0, runs[0]
     tp = fn = fp = 0
     head, amb, route, by_author = [], [], [], {}
     for c, r in zip(cases, results):
@@ -48,6 +49,10 @@ if __name__ == "__main__":
         print(f"{'PASS' if ok else 'FAIL'} {c['id']} {r['secs']:5.1f}s  {','.join(c['tags'])}{'  (ambiguous: not in headline score)' if is_amb else ''}")
         for w in why:
             print("      " + w)
+        for cl in ([] if ok else r["claims"]):
+            print(f"      - {cl['fact_type']} [{cl['confidence']}] {cl['quote']!r}")
+        for cl in ([] if ok else r["dropped"]):
+            print(f"      x DROPPED {cl.get('fact_type')} {cl.get('quote')!r}")
         (amb if is_amb else head).append(ok)
         by_author.setdefault(c["author"], []).append(ok)
         if not is_amb:
@@ -55,11 +60,14 @@ if __name__ == "__main__":
         if any(e["status"] == "human_review" for e in c["expected"].values()):
             route.append(all(r.get("report", {}).get(k, {}).get("status") == "human_review" for k, e in c["expected"].items() if e["status"] == "human_review"))
     secs = [r["secs"] for r in results]
-    print(f"\nsettings: PROMPT_VERSION={os.environ.get('PROMPT_VERSION', 'v2')} REASONING_EFFORT={os.environ.get('REASONING_EFFORT', 'default')} workers={a.workers}")
+    print(f"\nsettings: PROMPT_VERSION={os.environ.get('PROMPT_VERSION', 'v2')} REASONING_EFFORT={os.environ.get('REASONING_EFFORT', 'low')} workers={a.workers} repeat={a.repeat}")
     print(f"cases passed (headline): {sum(head)}/{len(head)}   ambiguous cases passed: {sum(amb)}/{len(amb)}")
     print(f"recall of planted gaps: {tp}/{tp + fn} = {tp / max(tp + fn, 1):.0%}   (goal 90%)")
     print(f"false flags: {fp} of {tp + fp} flags raised = {fp / max(tp + fp, 1):.0%}   (goal at most 10%)")
     print(f"human-review routing: {sum(route)}/{len(route)}   (goal 100%)")
-    print(f"latency per review: mean {sum(secs) / len(secs):.1f}s, max {max(secs):.1f}s   (goal under 60s)   wall time {wall:.0f}s")
-    print(f"claims dropped as ungrounded: {sum(r['dropped'] for r in results)}")
+    print(f"latency per review (first run): mean {sum(secs) / len(secs):.1f}s, max {max(secs):.1f}s   (goal under 60s)   wall time {wall:.0f}s")
+    print(f"claims dropped as ungrounded: {sum(len(r['dropped']) for r in results)}")
     print("by author: " + ", ".join(f"{k} {sum(v)}/{len(v)}" for k, v in by_author.items()))
+    if a.repeat > 1:
+        unstable = [c["id"] for i, c in enumerate(cases) if len({json.dumps(r[i].get("report"), sort_keys=True) for r in runs}) > 1]
+        print(f"stability over {a.repeat} runs: {len(cases) - len(unstable)}/{len(cases)} cases gave the same gap report every time; changed: {unstable}")
