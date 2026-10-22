@@ -20,7 +20,9 @@ def gap_report(sents, claims):
             continue
         miss = sorted(f for f in TABLE[k]["required_facts"] if f not in seen)
         unsure = sorted(f for f in TABLE[k]["required_facts"] if f in seen and not seen[f] & {"high", "medium"})
-        conf = sorted(f for f in TABLE[k].get("contradicted_by", []) if seen.get(f, set()) & {"high", "medium"})
+        conf = sorted({f for f in TABLE[k].get("contradicted_by", []) if seen.get(f, set()) & {"high", "medium"}}
+                      | {c["fact_type"] for c in claims if c["confidence"] in ("high", "medium") and c["fact_type"] in TABLE[k].get("contradicted_by_stance", {})
+                         and str(c.get("admitted")).lower() == str(TABLE[k]["contradicted_by_stance"][c["fact_type"]]).lower()})
         report[k] = {"status": "human_review" if conf else "gaps" if miss else "human_review" if unsure else "complete", "missing": miss, "low_confidence": unsure, "conflicts": conf}
     return report or {"no_charge_cited": {"status": "human_review", "reason": "no charge citation found in narrative"}}
 

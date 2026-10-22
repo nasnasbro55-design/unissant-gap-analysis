@@ -80,7 +80,7 @@ if __name__ == "__main__":
         if any(e["status"] == "human_review" for e in c["expected"].values()):
             route.append(all(r.get("report", {}).get(k, {}).get("status") == "human_review" for k, e in c["expected"].items() if e["status"] == "human_review"))
     secs = [r["secs"] for r in results]
-    print(f"\nsettings: PROMPT_VERSION={os.environ.get('PROMPT_VERSION', 'v3')} REASONING_EFFORT={os.environ.get('REASONING_EFFORT', 'low')} workers={a.workers} repeat={a.repeat} votes={a.votes}")
+    print(f"\nsettings: PROMPT_VERSION={os.environ.get('PROMPT_VERSION', 'v4')} REASONING_EFFORT={os.environ.get('REASONING_EFFORT', 'low')} workers={a.workers} repeat={a.repeat} votes={a.votes}")
     print(f"cases passed (headline): {head.count('pass')}/{len(head)}   sent to human because runs disagreed: {head.count('abst')}   wrong: {head.count('fail')}   ambiguous cases passed: {amb.count('pass')}/{len(amb)}")
     print(f"accuracy when the tool gave an answer: {head.count('pass')}/{head.count('pass') + head.count('fail')}")
     print(f"recall of planted gaps: {tp}/{tp + fn} = {tp / max(tp + fn, 1):.0%}   (goal 90%)")

@@ -12,7 +12,10 @@
     "source": "INA 212(a)(6)(A)(i); USCIS Policy Manual Vol. 7, Part L, Ch. 3",
     "contradicted_by": [
       "stated_lawful_admission"
-    ]
+    ],
+    "contradicted_by_stance": {
+      "admitted_or_paroled_status": true
+    }
   },
   "212(a)(9)(A)(i)": {
     "name": "Prior removal, reentry without admission",
@@ -27,7 +30,10 @@
     "source": "INA 212(a)(9)(A)(i); USCIS Policy Manual Vol. 7, Part L, Ch. 3",
     "contradicted_by": [
       "no_prior_removal_stated"
-    ]
+    ],
+    "contradicted_by_stance": {
+      "admitted_status_at_reentry": true
+    }
   },
   "212(a)(6)(C)(i)": {
     "name": "Misrepresentation or fraud",
