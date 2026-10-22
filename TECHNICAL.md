@@ -1,0 +1,232 @@
+# Technical Overview
+
+Team TNUX, Challenge+X Round 3, Unissant UC3: GenAI-Assisted Gap Analysis for Investigative Charge Documentation.
+
+This file is the single place for how the tool works, what is built, how well it performs, and what is left. Update it when any of those change.
+
+---
+
+## 1. The goal
+
+Officers write free-text narratives that cite charges (for example INA 212(a)(6)(A)(i)). Each charge needs certain facts to be documented. The tool reads a narrative and reports which required facts are missing for each charge cited, so the officer can fix the narrative before it moves on.
+
+What the tool does NOT do, by design and per Unissant:
+
+- It does not write or rewrite the narrative.
+- It does not pick, judge, or suggest a charge. It only checks the charges the officer cited.
+- It does not decide anything on its own. Every result is reviewed by a person, and unclear cases are sent to a person with a reason.
+
+### Unissant's success metrics (our targets)
+
+| Metric | Target |
+|---|---|
+| Recall of real gaps | at least 90% |
+| False flags (facts flagged missing that are present) | at most 10% |
+| Ambiguous cases routed to a human | 100% |
+| Time per review | under 60 seconds |
+
+Scoring is based on how accurately the tool finds missing information. Narratives are free text, not structured data.
+
+---
+
+## 2. Why our approach is different
+
+The generic version is "an LLM reads the narrative and lists what is missing." Most teams will build that. Its problems are well documented: legal AI tools hallucinate at high rates (Stanford RegLab measured over 17% on legal research tools), results change from run to run, and reviewers start trusting confident-looking output without checking it (automation bias).
+
+Our design splits the work so the LLM does only the part it is good at:
+
+```
+narrative
+   |
+   v
+[1] LLM extracts facts          -> fact type + exact quote + confidence (no judging)
+   |
+   v
+[2] Grounding check (code)      -> every quote must appear word for word in the narrative, or it is dropped
+   |
+   v
+[3] Rules engine (code)         -> compares found facts to the required-facts table for each cited charge
+   |
+   v
+[4] Conflict check (code)       -> does any stated fact contradict the cited charge?
+   |
+   v
+[5] Router (code)               -> unclear, conflicting, unknown-charge, no-citation, or model-down cases go to a human
+   |
+   v
+evidence-first report (JSON)    -> every line points to a statute element, a quote, and a sentence
+```
+
+Steps 2 to 5 are plain code, so the same facts always give the same report. This is what makes results consistent across officers and stations, which is one of Unissant's stated goals. The research angle is "rules as code" / neuro-symbolic compliance checking: the LLM handles messy language, deterministic rules make the decision.
+
+The model is Unissant's hosted gpt-oss-20b. We use only that model, and we are confirming with Unissant whether outside models are allowed.
+
+---
+
+## 3. Features
+
+Status key: **Built** = in the repo and tested. **Partial** = started. **Planned** = not started.
+
+### 3.1 Core pipeline (Built)
+
+- **Fact extraction** (`pipeline/extract.py`, prompts in `pipeline/prompts/`). The model returns JSON claims: fact type, shortest exact quote, confidence. The narrative is treated as data, and instructions inside it are ignored (tested with a prompt-injection case, c09).
+- **Grounding guardrail.** A claim is kept only if its quote is found in the narrative (ignoring case and spacing). Sentence IDs are computed by code from where the quote sits, never trusted from the model.
+- **Sentence splitter** that handles initials and abbreviations (`Subj.`, `K.`, `Mr.`), so quotes are not broken.
+- **Required-facts table** (`checks/elements/charge_elements.json`) with plain-English definitions (`fact_definitions.json`). Three charges so far:
+  - 212(a)(6)(A)(i), present without admission or parole
+  - 212(a)(9)(A)(i), prior removal, reentry without admission
+  - 212(a)(6)(C)(i), fraud or willful misrepresentation
+- **Rules engine** (`gap_report` in `pipeline/run_sample.py`). Per charge: `complete`, `gaps` (with the missing facts), or `human_review` (with a reason).
+- **Routing to a human** when: a charge is not in our table, no charge is cited, a required fact was found only with low confidence, a conflict is found, repeated runs disagree, or the model is unavailable.
+- **Timeout.** A model call that takes over 40 seconds fails fast and the case goes to a human, so a slow shared server cannot hang the demo.
+- **Speed.** `reasoning_effort=low` cut reviews from about 21 to 38 seconds down to about 5 to 9 seconds, with no loss in accuracy.
+
+### 3.2 Differentiator 1: Metamorphic testing (Built)
+
+`checks/eval/metamorphic.py` generates labeled test cases with code, with no hand-labeling:
+
+- Builds a complete narrative from fact sentences, then deletes 0 to 2 facts. The correct answer is exactly the deleted facts.
+- Applies one mutation that must not change the answer: all caps, all lowercase, abbreviations, a typo, or shuffled sentence order.
+- Facts that depend on each other are deleted together (for example, deleting the removal order also deletes the removal date).
+- Each remaining sentence is written so it does not imply a deleted fact. An early version broke this rule; we found it by inspecting failures and fixed it.
+
+Run with `--meta N`. The summary breaks results down by charge, by mutation, and by number of deleted facts. This gives a recall and stability curve over hundreds of cases where other teams will show a handful of examples.
+
+Limitation: generated narratives use fixed templates, so they test robustness, not natural writing. Hand-written cases from teammates cover natural writing.
+
+### 3.3 Differentiator 2: Contradiction detection (Built)
+
+Most tools check that a fact is present. Ours also checks that it fits the cited charge.
+
+- Each charge lists facts that contradict it (`contradicted_by`), for example a statement that the subject was lawfully admitted, for a charge that requires no admission.
+- Prompt v5 also asks the model for a yes/no `admitted` stance on admission facts; code checks the stance against `contradicted_by_stance`.
+- A conflict sends the charge to a human with the reason and the quote. The tool never suggests a different charge.
+- Test cases: 6 contradictions (x01 to x06) and 2 hard negatives that must NOT be flagged: an earlier lawful admission followed by a later unlawful entry (n01), and someone else's admission (n02).
+
+### 3.4 Differentiator 3: Abstain when unsure (Built, not the default)
+
+`pipeline/review.py` runs the extraction 3 times in parallel. If the runs give different reports for a charge, that charge goes to a human with the facts they disagreed on.
+
+Result so far: it catches random slips (metamorphic wrong answers went from 7 to 4) but not mistakes the model makes every time, and running 6 requests at once pushed one review to 97 seconds. So it is available with `--votes 3` but off by default. A possible improvement is to make the runs more independent (different fact order or slight temperature).
+
+### 3.5 Differentiator 4: Evidence-first report (Partial)
+
+- **Built:** the output contract (`pipeline/schemas.py`), the builder (`pipeline/report.py`), and a real sample (`backend/sample_report.json`). For every required fact: found or not, the quote, the sentence IDs, the confidence. Plus status, reason, conflicts, disagreements, statute source, and a disclaimer.
+- **Left:** `POST /review` endpoint (Ethan, `backend/app.py`) and the React screen with the narrative highlighted (Huy).
+
+### 3.6 Differentiator 5: Candid scorecard (Planned)
+
+A showcase slide with our measured recall, false-flag rate, routing, latency, and failure list on the 20B model, plus what the tool deliberately does not do. The numbers come from section 4, updated after the blind test set.
+
+### 3.7 Evaluation harness (Built)
+
+`checks/eval/run_eval.py` scores against Unissant's metrics.
+
+- Loads every `checks/eval/cases*.jsonl`, so each teammate keeps their own file. Scores are broken down by author.
+- `--workers N` (parallel requests), `--repeat N` (stability across runs), `--votes N` (abstain mode), `--meta N --seed S` (metamorphic cases), `--only ids`.
+- Cases tagged `ambiguous` are kept out of the headline score. `"missing": null` means only the status is checked (used for contradiction cases).
+- Failed cases print the extracted and dropped claims, so failures can be diagnosed.
+
+---
+
+## 4. Results so far
+
+Prompt v4, low reasoning, 3 parallel workers, 3 repeated runs, 60 metamorphic cases. These are our own development cases, so they are optimistic until the blind set is in.
+
+| Metric | Target | Result |
+|---|---|---|
+| Recall, hand-written cases | 90% | 9/9 (100%) |
+| False flags, hand-written cases | at most 10% | 1 of 10 (10%) |
+| Routing to human | 100% | 7/8 |
+| Latency | under 60s | mean 5.4s, max 8.8s |
+| Headline cases passed | | 16/18 |
+| Metamorphic cases passed | | 54/60 |
+| Metamorphic recall | 90% | 74/76 (97%) |
+| Metamorphic false flags | at most 10% | 5 of 79 (6%) |
+| Same report on all 3 runs | | 76/81 |
+
+The sample narrative from Unissant gives the expected gaps (place of entry for 212(a)(6)(A)(i), prior removal date for 212(a)(9)(A)(i)) on every run.
+
+### Known failures
+
+1. **Overstay after lawful admission (x06)** is caught in some runs and not others. Prompt v5 (stance check) targets this and needs a live test.
+2. **Lowercase names.** In all-lowercase narratives the model sometimes misses the subject's name.
+3. **"Entered near X" counted as how they entered.** When the manner of entry is not stated, the model sometimes counts the place sentence as manner.
+4. **Shared quotes in multi-charge narratives (c11).** One phrase that should cover several facts misses manner of entry.
+5. **Definition questions, pending Unissant:** whether the place where the subject was encountered counts as place of entry (c01, c13), and whether "never inspected" counts as an admission status (c08). These are tagged ambiguous.
+
+### Prompt history
+
+| Version | Change | Outcome |
+|---|---|---|
+| v1 | first extraction prompt | baseline |
+| v2 | each fact once, short quotes | fewer duplicate claims |
+| v3 | raw narrative, one quote can cover several facts | false flags 31% to 0% on early cases |
+| v4 | conflict rule | default now; slightly fewer false flags and more stable than v3 |
+| v5 | yes/no admission stance | built, waiting on live test |
+
+---
+
+## 5. Decisions and why
+
+- **The LLM extracts, code decides.** Keeps results repeatable and auditable.
+- **Quotes must be word for word.** Kills invented facts at the cost of occasionally dropping a paraphrased one.
+- **No charge suggestions, ever.** Unissant's instruction, and a legal risk.
+- **Low reasoning effort.** Same accuracy, 3 to 4 times faster.
+- **Voting is optional.** Real but small gain, real latency cost.
+- **Do not tune prompts on our own cases until the blind set arrives.** Every change fitted to our cases makes our numbers less trustworthy.
+- **Fictional data only.** No real case records or names anywhere in the repo. The API key lives in an environment variable and never in the repo.
+
+---
+
+## 6. What is left
+
+### Waiting on others
+- [ ] Blind test cases from Huy and Jake (`cases_huy.jsonl`, `cases_jake.jsonl`), including contradictions and charges we do not cover.
+- [ ] Jake's review of the expected answers in `cases.jsonl`.
+- [ ] Unissant answers: outside models allowed? Does the encounter location count as place of entry?
+
+### Pipeline
+- [ ] Live-test v5 against v4 (`--repeat 3 --meta 60`). Keep v5 only if it fixes x06 without breaking n01 or anything else.
+- [ ] After the blind set: address known failures 2 to 4, re-score, and record the result.
+- [ ] Fix the citation pattern so 5-level cites like `212(a)(7)(A)(i)(I)` are read in full.
+- [ ] Add 1 or 2 more common charges (for example 212(a)(7)(A)(i)(I), no valid entry documents), checked against the statute and marked for Unissant to confirm.
+- [ ] Decide on voting after testing more independent runs.
+
+### Product
+- [ ] `POST /review` endpoint wrapping `build_report` (Ethan).
+- [ ] React review screen: per-charge status, missing facts, highlighted quotes, disclaimer, no suggested charges (Huy).
+- [ ] Load check: several reviews at once against the shared server before showcase day.
+
+### Showcase (Saturday 7 Nov)
+- [ ] Update README (open questions are out of date; list models used and where a human reviews output, per Unissant's guardrail).
+- [ ] Scorecard slide from section 4, with the failure list.
+- [ ] Live demo script: one clean narrative, one with gaps, one contradiction, one unknown charge.
+
+---
+
+## 7. Where things are
+
+| Path | What it is |
+|---|---|
+| `pipeline/llm_client.py` | connection to the hosted model (key from `CHALLENGEX_API_KEY`) |
+| `pipeline/extract.py` | sentence splitting, extraction, grounding |
+| `pipeline/prompts/` | extraction prompts v1 to v5 |
+| `pipeline/run_sample.py` | rules engine (`gap_report`) and the sample narrative check |
+| `pipeline/review.py` | voting / abstain mode |
+| `pipeline/report.py` | builds the evidence-first report |
+| `pipeline/schemas.py` | report contract |
+| `checks/elements/` | required-facts table, fact definitions, hand markup of the sample |
+| `checks/eval/` | harness, test cases, metamorphic generator |
+| `backend/sample_report.json` | example report for the front end |
+| `data/sample_narrative.txt` | Unissant's sample narrative |
+
+### How to run
+
+```
+export CHALLENGEX_API_KEY=...        # never commit this
+python3 pipeline/run_sample.py 3     # sample narrative, 3 runs
+python3 checks/eval/run_eval.py --workers 3 --repeat 3 --meta 60
+PROMPT_VERSION=v5 python3 checks/eval/run_eval.py --workers 3 --repeat 3 --meta 60
+python3 checks/eval/run_eval.py --workers 2 --votes 3 --meta 60
+```
