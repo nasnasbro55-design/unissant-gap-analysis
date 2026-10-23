@@ -52,13 +52,15 @@ Synthetic and fictional data only. No real case records or names anywhere in thi
 ## Quick start
 
 ```
-pip install openai
+pip install -r requirements.txt
 export CHALLENGEX_API_KEY=...          # never commit the key
 python3 pipeline/run_sample.py 3       # check Unissant's sample narrative
 python3 checks/eval/run_eval.py --workers 3 --repeat 3 --meta 60
 ```
 
 How to add test cases: [checks/eval/README.md](checks/eval/README.md). Report format for the front end: `pipeline/schemas.py` and `backend/sample_report.json`.
+
+Start the review API with `uvicorn backend.app:app`. Send `POST /review` a JSON body such as `{"narrative": "..."}`; the response is the report. The API uses the model key from `CHALLENGEX_API_KEY`.
 
 ## Team: TNUX
 
