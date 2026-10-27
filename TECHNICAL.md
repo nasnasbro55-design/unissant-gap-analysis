@@ -99,7 +99,7 @@ Limitation: generated narratives use fixed templates, so they test robustness, n
 Most tools check that a fact is present. Ours also checks that it fits the cited charge.
 
 - Each charge lists facts that contradict it (`contradicted_by`), for example a statement that the subject was lawfully admitted, for a charge that requires no admission.
-- Prompt v5 also asks the model for a yes/no `admitted` stance on admission facts; code checks the stance against `contradicted_by_stance`.
+- Prompt v5 (the default) also asks the model for a yes/no `admitted` stance on admission facts; code checks the stance against `contradicted_by_stance`. This caught the overstay case (x06) that the separate conflict fact type missed.
 - A conflict sends the charge to a human with the reason and the quote. The tool never suggests a different charge.
 - Test cases: 6 contradictions (x01 to x06) and 2 hard negatives that must NOT be flagged: an earlier lawful admission followed by a later unlawful entry (n01), and someone else's admission (n02).
 
@@ -131,25 +131,28 @@ A showcase slide with our measured recall, false-flag rate, routing, latency, an
 
 ## 4. Results so far
 
-Prompt v4, low reasoning, 3 parallel workers, 3 repeated runs, 60 metamorphic cases. These are our own development cases, so they are optimistic until the blind set is in.
+Prompt v5, low reasoning, 3 parallel workers, 3 repeated runs, 60 metamorphic cases. Pass/fail is from the first run; stability is across all three. These are our own development cases, so they are optimistic until the blind set is in.
 
 | Metric | Target | Result |
 |---|---|---|
 | Recall, hand-written cases | 90% | 9/9 (100%) |
 | False flags, hand-written cases | at most 10% | 1 of 10 (10%) |
-| Routing to human | 100% | 7/8 |
-| Latency | under 60s | mean 5.4s, max 8.8s |
-| Headline cases passed | | 16/18 |
-| Metamorphic cases passed | | 54/60 |
-| Metamorphic recall | 90% | 74/76 (97%) |
-| Metamorphic false flags | at most 10% | 5 of 79 (6%) |
-| Same report on all 3 runs | | 76/81 |
+| Routing to human | 100% | 8/8 |
+| Latency | under 60s | mean 5.5s, max 15.9s |
+| Headline cases passed | | 17/18 |
+| Contradiction and hard-negative cases | | 8/8 |
+| Metamorphic cases passed | | 51/60 |
+| Metamorphic recall | 90% | 72/76 (95%) |
+| Metamorphic false flags | at most 10% | 7 of 79 (9%) |
+| Same report on all 3 runs | | 73/81 |
+
+v5 against v4: v5 fixed the overstay contradiction (x06) and reached 8/8 routing, but scored 3 fewer metamorphic cases (54 to 51) and was slightly less stable. Several contradiction cases (x01, x03, x04) changed between runs, so the per-run counts printed by `--repeat` are the number to quote, not one run.
 
 The sample narrative from Unissant gives the expected gaps (place of entry for 212(a)(6)(A)(i), prior removal date for 212(a)(9)(A)(i)) on every run.
 
 ### Known failures
 
-1. **Overstay after lawful admission (x06)** is caught in some runs and not others. Prompt v5 (stance check) targets this and needs a live test.
+1. **Contradiction cases are not stable across runs.** v5 fixed x06 and passed all 8 on the first run, but x01, x03 and x04 changed between runs. Also, in 3 metamorphic cases v5 reported an admission status that had been deleted, possibly a side effect of asking for the stance. Watch both on the blind set.
 2. **Lowercase names.** In all-lowercase narratives the model sometimes misses the subject's name.
 3. **"Entered near X" counted as how they entered.** When the manner of entry is not stated, the model sometimes counts the place sentence as manner.
 4. **Shared quotes in multi-charge narratives (c11).** One phrase that should cover several facts misses manner of entry.
@@ -162,8 +165,8 @@ The sample narrative from Unissant gives the expected gaps (place of entry for 2
 | v1 | first extraction prompt | baseline |
 | v2 | each fact once, short quotes | fewer duplicate claims |
 | v3 | raw narrative, one quote can cover several facts | false flags 31% to 0% on early cases |
-| v4 | conflict rule | default now; slightly fewer false flags and more stable than v3 |
-| v5 | yes/no admission stance | built, waiting on live test |
+| v4 | conflict rule | slightly fewer false flags and more stable than v3 |
+| v5 | yes/no admission stance, checked in code | **default.** Fixed x06, 8/8 routing; 3 fewer metamorphic passes than v4 |
 
 ---
 
@@ -187,7 +190,8 @@ The sample narrative from Unissant gives the expected gaps (place of entry for 2
 - [ ] Unissant answers: outside models allowed? Does the encounter location count as place of entry?
 
 ### Pipeline
-- [ ] Live-test v5 against v4 (`--repeat 3 --meta 60`). Keep v5 only if it fixes x06 without breaking n01 or anything else.
+- [x] Live-test v5 against v4. v5 is the default (fixed x06, n01 not broken, small metamorphic cost).
+- [ ] Re-run v5 with `--repeat 3` to get per-case pass counts across runs, especially for x01 to x06.
 - [ ] After the blind set: address known failures 2 to 4, re-score, and record the result.
 - [ ] Fix the citation pattern so 5-level cites like `212(a)(7)(A)(i)(I)` are read in full.
 - [ ] Add 1 or 2 more common charges (for example 212(a)(7)(A)(i)(I), no valid entry documents), checked against the statute and marked for Unissant to confirm.
@@ -227,6 +231,6 @@ The sample narrative from Unissant gives the expected gaps (place of entry for 2
 export CHALLENGEX_API_KEY=...        # never commit this
 python3 pipeline/run_sample.py 3     # sample narrative, 3 runs
 python3 checks/eval/run_eval.py --workers 3 --repeat 3 --meta 60
-PROMPT_VERSION=v5 python3 checks/eval/run_eval.py --workers 3 --repeat 3 --meta 60
+PROMPT_VERSION=v4 python3 checks/eval/run_eval.py --workers 3 --repeat 3 --meta 60   # compare with the previous prompt
 python3 checks/eval/run_eval.py --workers 2 --votes 3 --meta 60
 ```

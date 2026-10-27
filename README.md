@@ -23,14 +23,14 @@ The tool never writes the narrative and never picks or suggests a charge. It onl
 
 ## Results so far
 
-On our own development cases (prompt v4, gpt-oss-20b, low reasoning). These will be re-measured on a blind test set.
+On our own development cases (prompt v5, gpt-oss-20b, low reasoning). These will be re-measured on a blind test set.
 
 | Unissant goal | Target | Current |
 |---|---|---|
-| Recall of real gaps | at least 90% | 100% (hand-written), 97% (generated) |
-| False flags | at most 10% | 10% (hand-written), 6% (generated) |
-| Ambiguous cases to a human | 100% | 7 of 8 |
-| Time per review | under 60s | about 5s average, 9s max |
+| Recall of real gaps | at least 90% | 100% (hand-written), 95% (generated) |
+| False flags | at most 10% | 10% (hand-written), 9% (generated) |
+| Ambiguous cases to a human | 100% | 8 of 8 |
+| Time per review | under 60s | about 5.5s average, 16s max |
 
 Known failures and what we're doing about them are in [TECHNICAL.md](TECHNICAL.md#known-failures).
 

@@ -80,7 +80,7 @@ if __name__ == "__main__":
         if any(e["status"] == "human_review" for e in c["expected"].values()):
             route.append(all(r.get("report", {}).get(k, {}).get("status") == "human_review" for k, e in c["expected"].items() if e["status"] == "human_review"))
     secs = [r["secs"] for r in results]
-    print(f"\nsettings: PROMPT_VERSION={os.environ.get('PROMPT_VERSION', 'v4')} REASONING_EFFORT={os.environ.get('REASONING_EFFORT', 'low')} workers={a.workers} repeat={a.repeat} votes={a.votes}")
+    print(f"\nsettings: PROMPT_VERSION={os.environ.get('PROMPT_VERSION', 'v5')} REASONING_EFFORT={os.environ.get('REASONING_EFFORT', 'low')} workers={a.workers} repeat={a.repeat} votes={a.votes}")
     print(f"cases passed (headline): {head.count('pass')}/{len(head)}   sent to human because runs disagreed: {head.count('abst')}   wrong: {head.count('fail')}   ambiguous cases passed: {amb.count('pass')}/{len(amb)}")
     print(f"accuracy when the tool gave an answer: {head.count('pass')}/{head.count('pass') + head.count('fail')}")
     print(f"recall of planted gaps: {tp}/{tp + fn} = {tp / max(tp + fn, 1):.0%}   (goal 90%)")
@@ -96,5 +96,8 @@ if __name__ == "__main__":
             g = [m for m in meta if t in m[0]["tags"]]
             print(f"   {t:<18} {sum(m[1] for m in g)}/{len(g)}")
     if a.repeat > 1:
+        flaky = [(c["id"], sum(score(c, r[i])[3] for r in runs)) for i, c in enumerate(cases)]
+        print("passed in only some runs: " + (", ".join(f"{k} {n}/{a.repeat}" for k, n in flaky if 0 < n < a.repeat) or "none"))
+        print("failed in every run: " + (", ".join(k for k, n in flaky if n == 0) or "none"))
         unstable = [c["id"] for i, c in enumerate(cases) if len({json.dumps(r[i].get("report"), sort_keys=True) for r in runs}) > 1]
         print(f"stability over {a.repeat} runs: {len(cases) - len(unstable)}/{len(cases)} cases gave the same gap report every time; changed: {unstable}")
