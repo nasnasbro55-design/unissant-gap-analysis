@@ -36,7 +36,7 @@ the real pipeline and scores it:
 - `--repeat N` runs the whole set N times and lists the cases whose gap report changed
   between runs (the model's extraction is not perfectly repeatable, so measure it).
 - Failed cases print the facts the model extracted and any claims dropped as ungrounded.
-- Settings come from the environment: `PROMPT_VERSION` (v4 default, which adds the conflict rule; v3 and v2 are the older
+- Settings come from the environment: `PROMPT_VERSION` (v5 default, which adds the yes/no admission stance; v4, v3 and v2 are the older
   prompt) and `REASONING_EFFORT` (low default; `default` leaves the server's setting).
 
 - A narrative whose facts contradict the charge it cites (for example it says the subject was
