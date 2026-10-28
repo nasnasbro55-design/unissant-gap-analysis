@@ -2,6 +2,8 @@
 
 **Status:** Building (Weeks 5-6 of Challenge+X). The core pipeline, contradiction check, and evaluation harness work end to end against Unissant's hosted model. Front end, API, and blind testing are in progress. Full technical details, results, and the to-do list are in **[TECHNICAL.md](TECHNICAL.md)**.
 
+**Showcase deck:** [TNUX Unissant Showcase Deck](https://claude.ai/artifact/SeZeysx3uUsC2kKFWLdPXF) (shared with the team; a PDF copy goes in `docs/` before the showcase).
+
 This project is part of Challenge+X, Round 3, sponsored by **Unissant** (use case UC3).
 
 ## The problem
