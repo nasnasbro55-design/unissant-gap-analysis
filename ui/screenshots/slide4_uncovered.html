@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Slide 4: Uncovered Statutory Charge (Safe Human Routing)</title>
+  <link rel="stylesheet" href="../src/index.css">
+  <style>
+    body { background: #f8fafc; margin: 0; padding: 0; }
+    .slide-badge { background: #475569; color: white; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <div class="header-brand">
+        <div class="brand-logo">⚖️</div>
+        <div>
+          <h1 class="brand-title">CBP Investigative Narrative Gap Analysis</h1>
+          <p class="brand-subtitle">Challenge+X · Unissant UC3 · Team TNUX</p>
+        </div>
+      </div>
+      <div class="header-controls">
+        <span class="slide-badge">Slide Showcase: Uncovered Charge</span>
+      </div>
+    </header>
+
+    <div class="disclaimer-banner">
+      <div>ℹ️</div>
+      <div class="disclaimer-text">
+        <strong>Official Review Guardrail: </strong> Flags missing documentation only. It does not judge the case or suggest charges. A person reviews every result.
+      </div>
+      <div class="disclaimer-tag">Human-in-the-Loop</div>
+    </div>
+
+    <div class="metrics-bar">
+      <div class="metric-chip"><span class="metric-label">Model</span><span class="metric-value font-mono">gpt-oss-20b</span></div>
+      <div class="metric-chip"><span class="metric-label">Prompt</span><span class="metric-value font-mono">v5</span></div>
+      <div class="metric-chip"><span class="metric-label">Review Latency</span><span class="metric-value font-mono">3.2s</span></div>
+      <div class="metric-chip"><span class="metric-label">Charges Checked</span><span class="metric-value">1</span></div>
+      <div class="metric-chip"><span class="metric-label">Charge Status</span><span class="metric-value text-purple">Outside Table</span></div>
+      <div class="metric-chip"><span class="metric-label">Routing</span><span class="metric-value text-purple">👁 Human Review Required</span></div>
+    </div>
+
+    <main class="main-content">
+      <section class="column-narrative">
+        <div class="narrative-viewer-card">
+          <div class="card-header">
+            <div class="header-title"><h3>Officer Narrative</h3></div>
+            <span class="badge-subtle">2 Sentences</span>
+          </div>
+          <div class="narrative-body">
+            <div class="narrative-sentence-row">
+              <div class="sentence-id-pill">S1</div>
+              <div class="sentence-text">Subject MARCOS ANDRADE-SILVA, a citizen of Brazil, was convicted on 10/12/2024 in Harris County Criminal Court of felony theft.</div>
+            </div>
+            <div class="narrative-sentence-row sentence-active">
+              <div class="sentence-id-pill">S2</div>
+              <div class="sentence-text">Subject is inadmissible under INA 212(a)(2)(A)(i) as an alien convicted of a crime involving moral turpitude.</div>
+            </div>
+          </div>
+          <div class="narrative-footer">
+            <span class="legend-item"><span class="legend-pill">S2</span> Cited Charge Sentence</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="column-charges">
+        <div class="charges-header">
+          <div class="charges-title-wrap">
+            <h3>Cited Charges & Statutory Findings</h3>
+            <p class="charges-subtitle">Deterministic rules check every required element against grounded quotes from the narrative.</p>
+          </div>
+          <div class="charges-status-summary">
+            <span class="status-pill status-review">1 Routed to Human</span>
+          </div>
+        </div>
+
+        <div class="charges-list">
+          <div class="charge-card charge-human_review">
+            <div class="charge-card-header">
+              <div class="charge-title-section">
+                <div class="citation-pill">INA § 212(a)(2)(A)(i)</div>
+                <h4 class="charge-name">Statute 212(a)(2)(A)(i)</h4>
+                <div class="statute-source">Criminal and Related Grounds (Crimes Involving Moral Turpitude)</div>
+              </div>
+              <span class="status-badge status-review">👁 Human Review Required</span>
+            </div>
+
+            <div class="charge-card-content">
+              <div class="reason-alert">
+                <div class="alert-icon">🛡️</div>
+                <div class="alert-content">
+                  <strong>Human Review Trigger: </strong>
+                  <span>Charge not in reference table; officer must verify statutory elements manually.</span>
+                </div>
+              </div>
+
+              <div class="section-block">
+                <p style="font-size:0.875rem; color:#475569; line-height:1.6;">
+                  The system recognizes INA 212(a)(2)(A)(i) as a valid citation. Because this section is not currently in the active required-elements database (which currently covers 212(a)(6)(A)(i), 212(a)(9)(A)(i), and 212(a)(6)(C)(i)), the engine safely defers judgment to a human officer rather than hallucinating or guessing.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

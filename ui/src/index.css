@@ -934,3 +934,230 @@ body {
   font-size: 2rem;
   margin-bottom: 0.5rem;
 }
+
+/* Live Narrative Editor Section */
+.live-editor-section {
+  background: #ffffff;
+  border-bottom: 2px solid #2563eb;
+  padding: 1.25rem 2rem;
+  box-shadow: var(--shadow-md);
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.editor-card {
+  max-width: 1540px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.editor-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-main);
+}
+
+.editor-title code {
+  background: #eff6ff;
+  color: #1d4ed8;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.live-pulse-dot {
+  width: 8px;
+  height: 8px;
+  background: #10b981;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+  display: inline-block;
+}
+
+.quick-fill-chips {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.quick-fill-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.quick-fill-btn {
+  background: #f1f5f9;
+  border: 1px solid var(--border);
+  color: #334155;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.quick-fill-btn:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.live-narrative-textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  resize: vertical;
+  color: #1e293b;
+  outline: none;
+}
+
+.live-narrative-textarea:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+.editor-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.live-hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.live-hint code {
+  font-family: var(--font-mono);
+}
+
+.btn-run-review {
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.55rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background 0.15s ease;
+}
+
+.btn-run-review:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.btn-run-review:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.btn-active {
+  background: #1d4ed8 !important;
+}
+
+/* Loading Banner */
+.loading-banner {
+  background: #eff6ff;
+  border-bottom: 2px solid #3b82f6;
+  padding: 0.875rem 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  animation: fadeIn 0.2s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.spinner {
+  width: 22px;
+  height: 22px;
+  border: 3px solid #bfdbfe;
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-text {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.875rem;
+  color: #1e40af;
+}
+
+.loading-text code {
+  font-family: var(--font-mono);
+  background: #dbeafe;
+  padding: 0.1rem 0.3rem;
+  border-radius: 3px;
+}
+
+/* API Error Banner */
+.api-error-banner {
+  background: #fef2f2;
+  border-bottom: 1px solid #fecaca;
+  padding: 0.875rem 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  color: #991b1b;
+}
+
+.error-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.error-body {
+  flex: 1;
+}
+
+.error-body p {
+  font-size: 0.8125rem;
+  margin-top: 0.15rem;
+  color: #7f1d1d;
+}
+
+.btn-dismiss {
+  background: transparent;
+  border: none;
+  font-size: 1.125rem;
+  color: #991b1b;
+  cursor: pointer;
+  padding: 0.25rem;
+}

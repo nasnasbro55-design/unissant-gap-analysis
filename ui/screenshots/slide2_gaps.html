@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Slide 2: Narrative with Gaps (Missing Statutory Facts)</title>
+  <link rel="stylesheet" href="../src/index.css">
+  <style>
+    body { background: #f8fafc; margin: 0; padding: 0; }
+    .slide-badge { background: #d97706; color: white; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <div class="header-brand">
+        <div class="brand-logo">⚖️</div>
+        <div>
+          <h1 class="brand-title">CBP Investigative Narrative Gap Analysis</h1>
+          <p class="brand-subtitle">Challenge+X · Unissant UC3 · Team TNUX</p>
+        </div>
+      </div>
+      <div class="header-controls">
+        <span class="slide-badge">Slide Showcase: Gaps Flagged Case</span>
+      </div>
+    </header>
+
+    <div class="disclaimer-banner">
+      <div>ℹ️</div>
+      <div class="disclaimer-text">
+        <strong>Official Review Guardrail: </strong> Flags missing documentation only. It does not judge the case or suggest charges. A person reviews every result.
+      </div>
+      <div class="disclaimer-tag">Human-in-the-Loop</div>
+    </div>
+
+    <div class="metrics-bar">
+      <div class="metric-chip"><span class="metric-label">Model</span><span class="metric-value font-mono">gpt-oss-20b</span></div>
+      <div class="metric-chip"><span class="metric-label">Prompt</span><span class="metric-value font-mono">v5</span></div>
+      <div class="metric-chip"><span class="metric-label">Review Latency</span><span class="metric-value font-mono">5.4s</span></div>
+      <div class="metric-chip"><span class="metric-label">Charges Checked</span><span class="metric-value">2</span></div>
+      <div class="metric-chip"><span class="metric-label">Gaps Identified</span><span class="metric-value text-amber">2 Missing Facts</span></div>
+      <div class="metric-chip"><span class="metric-label">Status</span><span class="metric-value text-amber">⚠ Gaps Detected</span></div>
+    </div>
+
+    <main class="main-content">
+      <section class="column-narrative">
+        <div class="narrative-viewer-card">
+          <div class="card-header">
+            <div class="header-title"><h3>Officer Narrative</h3></div>
+            <span class="badge-subtle">5 Sentences</span>
+          </div>
+          <div class="narrative-body">
+            <div class="narrative-sentence-row">
+              <div class="sentence-id-pill">S1</div>
+              <div class="sentence-text">INADMISSIBILITY: 'John Doe' a citizen of Mexico.</div>
+            </div>
+            <div class="narrative-sentence-row">
+              <div class="sentence-id-pill">S2</div>
+              <div class="sentence-text">He has never had any documents that would allow him to be, or remain, in the United States legally.</div>
+            </div>
+            <div class="narrative-sentence-row">
+              <div class="sentence-id-pill">S3</div>
+              <div class="sentence-text">'John Doe' is inadmissible under section 212(a) (6) (A) (i) of the INA, in that he <mark class="quote-highlight">entered the United States at a place not designated by the Attorney General</mark> and <mark class="quote-highlight">was not then admitted or paroled</mark> after inspection by an immigration officer.</div>
+            </div>
+            <div class="narrative-sentence-row">
+              <div class="sentence-id-pill">S4</div>
+              <div class="sentence-text">INADMISSIBILITY: Subject is inadmissible under Section 212(A) (9) (A) (I) of the Immigration and Nationality Act, as amended, in that he was <mark class="quote-highlight">previously ordered removed</mark> and <mark class="quote-highlight">entered or attempted to enter without being admitted</mark>.</div>
+            </div>
+            <div class="narrative-sentence-row">
+              <div class="sentence-id-pill">S5</div>
+              <div class="sentence-text">REMOVABILITY: Subject is removable under Section 212 because he was found inadmissible as an arriving alien in proceedings under section 235(b)l of the Act.</div>
+            </div>
+          </div>
+          <div class="narrative-footer">
+            <span class="legend-item"><mark class="legend-mark">Highlighted text</mark> Grounded Quote</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="column-charges">
+        <div class="charges-header">
+          <div class="charges-title-wrap">
+            <h3>Cited Charges & Statutory Findings</h3>
+            <p class="charges-subtitle">Deterministic rules check every required element against grounded quotes from the narrative.</p>
+          </div>
+          <div class="charges-status-summary">
+            <span class="status-pill status-gaps">2 Charges with Gaps</span>
+          </div>
+        </div>
+
+        <div class="charges-list">
+          <!-- Charge 1: 212(a)(6)(A)(i) -->
+          <div class="charge-card charge-gaps">
+            <div class="charge-card-header">
+              <div class="charge-title-section">
+                <div class="citation-pill">INA § 212(a)(6)(A)(i)</div>
+                <h4 class="charge-name">Present without admission or parole</h4>
+                <div class="statute-source">INA 212(a)(6)(A)(i); USCIS Policy Manual Vol. 7, Part L, Ch. 3</div>
+              </div>
+              <span class="status-badge status-gaps">⚠ 1 Missing Fact</span>
+            </div>
+
+            <div class="charge-card-content">
+              <div class="section-block">
+                <div class="section-title"><span class="indicator-dot dot-gap"></span><h5>Missing Statutory Facts (1)</h5></div>
+                <div class="missing-facts-grid">
+                  <div class="missing-fact-pill"><span class="missing-icon">✕</span><span class="missing-label">place of entry</span></div>
+                </div>
+              </div>
+
+              <div class="section-block">
+                <div class="section-title"><span class="indicator-dot dot-found"></span><h5>Found Facts (4 of 5)</h5></div>
+                <div class="found-facts-list">
+                  <div class="found-fact-row">
+                    <div class="fact-row-header"><span class="fact-name">Manner of Entry</span><div><span class="sentence-tag">S3</span><span class="confidence-badge conf-high">HIGH CONF</span></div></div>
+                    <div class="fact-quote-box">“entered the United States at a place not designated by the Attorney General”</div>
+                  </div>
+                  <div class="found-fact-row">
+                    <div class="fact-row-header"><span class="fact-name">Admitted or Paroled Status</span><div><span class="sentence-tag">S3</span><span class="confidence-badge conf-high">HIGH CONF</span></div></div>
+                    <div class="fact-quote-box">“was not then admitted or paroled”</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Charge 2: 212(a)(9)(A)(i) -->
+          <div class="charge-card charge-gaps">
+            <div class="charge-card-header">
+              <div class="charge-title-section">
+                <div class="citation-pill">INA § 212(a)(9)(A)(i)</div>
+                <h4 class="charge-name">Prior removal, reentry without admission</h4>
+                <div class="statute-source">INA 212(a)(9)(A)(i); USCIS Policy Manual Vol. 7, Part L, Ch. 3</div>
+              </div>
+              <span class="status-badge status-gaps">⚠ 1 Missing Fact</span>
+            </div>
+
+            <div class="charge-card-content">
+              <div class="section-block">
+                <div class="section-title"><span class="indicator-dot dot-gap"></span><h5>Missing Statutory Facts (1)</h5></div>
+                <div class="missing-facts-grid">
+                  <div class="missing-fact-pill"><span class="missing-icon">✕</span><span class="missing-label">prior removal date</span></div>
+                </div>
+              </div>
+
+              <div class="section-block">
+                <div class="section-title"><span class="indicator-dot dot-found"></span><h5>Found Facts (4 of 5)</h5></div>
+                <div class="found-facts-list">
+                  <div class="found-fact-row">
+                    <div class="fact-row-header"><span class="fact-name">Prior Removal Order</span><div><span class="sentence-tag">S4</span><span class="confidence-badge conf-high">HIGH CONF</span></div></div>
+                    <div class="fact-quote-box">“previously ordered removed”</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

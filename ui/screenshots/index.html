@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Gap Analysis UI Slides & Screenshots Deck | Team TNUX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: #0f172a; color: #f8fafc; min-height: 100vh; padding: 1.5rem; }
+    .header-bar { display: flex; justify-content: space-between; align-items: center; max-width: 1400px; margin: 0 auto 1.5rem auto; border-bottom: 1px solid #334155; padding-bottom: 1rem; }
+    .header-bar h1 { font-size: 1.25rem; font-weight: 700; }
+    .header-bar p { font-size: 0.8125rem; color: #94a3b8; }
+    .tabs-nav { display: flex; gap: 0.75rem; }
+    .tab-btn { background: #1e293b; color: #94a3b8; border: 1px solid #334155; padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600; font-size: 0.875rem; cursor: pointer; transition: all 0.15s; }
+    .tab-btn:hover { background: #334155; color: #fff; }
+    .tab-btn.active { background: #2563eb; color: #fff; border-color: #2563eb; }
+    .slide-stage-container { max-width: 1400px; margin: 0 auto; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+    iframe { width: 100%; height: 820px; border: none; display: block; }
+    .instructions-bar { max-width: 1400px; margin: 1rem auto 0 auto; display: flex; justify-content: space-between; align-items: center; font-size: 0.8125rem; color: #94a3b8; }
+    .shortcut-badge { background: #334155; color: #e2e8f0; padding: 0.15rem 0.45rem; border-radius: 4px; font-family: monospace; }
+  </style>
+</head>
+<body>
+
+  <div class="header-bar">
+    <div>
+      <h1>Showcase UI Slide Screenshots (Unissant UC3)</h1>
+      <p>High-resolution slide view for pitch presentation deck · Team TNUX</p>
+    </div>
+    <div class="tabs-nav">
+      <button class="tab-btn active" onclick="switchSlide(1, this)">1. Clean Narrative</button>
+      <button class="tab-btn" onclick="switchSlide(2, this)">2. Gaps Flagged</button>
+      <button class="tab-btn" onclick="switchSlide(3, this)">3. Contradiction</button>
+      <button class="tab-btn" onclick="switchSlide(4, this)">4. Uncovered Charge</button>
+    </div>
+  </div>
+
+  <div class="slide-stage-container">
+    <iframe id="slideFrame" src="slide1_clean.html"></iframe>
+  </div>
+
+  <div class="instructions-bar">
+    <div>
+      <strong>Tip for Naz / Ethan / Pitch Slides:</strong> Press <span class="shortcut-badge">Win + Shift + S</span> (or <span class="shortcut-badge">Cmd + Shift + 4</span> on Mac) to copy any slide image directly into PowerPoint / Google Slides.
+    </div>
+    <div>
+      Individual files: 
+      <a href="slide1_clean.html" target="_blank" style="color:#60a5fa; margin-left:0.5rem;">Slide 1</a> | 
+      <a href="slide2_gaps.html" target="_blank" style="color:#60a5fa; margin-left:0.5rem;">Slide 2</a> | 
+      <a href="slide3_contradiction.html" target="_blank" style="color:#60a5fa; margin-left:0.5rem;">Slide 3</a> | 
+      <a href="slide4_uncovered.html" target="_blank" style="color:#60a5fa; margin-left:0.5rem;">Slide 4</a>
+    </div>
+  </div>
+
+  <script>
+    const slides = [
+      'slide1_clean.html',
+      'slide2_gaps.html',
+      'slide3_contradiction.html',
+      'slide4_uncovered.html'
+    ];
+
+    function switchSlide(idx, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('slideFrame').src = slides[idx - 1];
+    }
+  </script>
+</body>
+</html>

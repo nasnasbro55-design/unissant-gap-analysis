@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import DisclaimerBanner from './components/DisclaimerBanner';
 import NarrativeViewer from './components/NarrativeViewer';
 import ChargeCard from './components/ChargeCard';
 import sampleReport from './data/sample_report.json';
 import { DEMO_PRESETS } from './data/demo_reports';
+
+const LIVE_API_URL = 'http://localhost:8000/review';
 
 export default function App() {
   const [report, setReport] = useState(sampleReport);
@@ -13,19 +15,42 @@ export default function App() {
   const [activeFactKey, setActiveFactKey] = useState(null);
   const [selectedSentenceId, setSelectedSentenceId] = useState(null);
   
-  // Custom input state
-  const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
-  const [customNarrative, setCustomNarrative] = useState('');
+  // Live input & API state
+  const [showLiveEditor, setShowLiveEditor] = useState(false);
+  const [narrativeInput, setNarrativeInput] = useState(
+    "INADMISSIBILITY: 'John Doe' a citizen of Mexico. He has never had any documents that would allow him to be, or remain, in the United States legally. 'John Doe' is inadmissible under section 212(a) (6) (A) (i) of the INA, in that he entered the United States at a place not designated by the Attorney General and was not then admitted or paroled after inspection by an immigration officer. INADMISSIBILITY: Subject is inadmissible under Section 212(A) (9) (A) (I) of the Immigration and Nationality Act, as amended, in that he was previously ordered removed and entered or attempted to enter without being admitted."
+  );
   const [isLoading, setIsLoading] = useState(false);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [apiError, setApiError] = useState(null);
+  const timerRef = useRef(null);
+
+  // Timer for loading state
+  useEffect(() => {
+    if (isLoading) {
+      setElapsedSeconds(0);
+      timerRef.current = setInterval(() => {
+        setElapsedSeconds(prev => +(prev + 0.1).toFixed(1));
+      }, 100);
+    } else {
+      if (timerRef.current) clearInterval(timerRef.current);
+    }
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [isLoading]);
 
   // Switch demo preset
   const handlePresetChange = (presetId) => {
     setSelectedPresetId(presetId);
+    setApiError(null);
     clearHighlights();
     const preset = DEMO_PRESETS.find(p => p.id === presetId);
     if (preset) {
       setReport(preset.data);
+      // Also update narrative editor with this preset's sentences
+      const fullText = Object.values(preset.data.sentences || {}).join(' ');
+      setNarrativeInput(fullText);
     }
   };
 
@@ -36,7 +61,6 @@ export default function App() {
   };
 
   const handleLeaveFact = () => {
-    // If a fact was pinned via click, keep it; otherwise clear
     if (!activeFactKey) {
       setActiveSentenceIds([]);
       setActiveQuotes([]);
@@ -46,7 +70,6 @@ export default function App() {
   // Clicking on a fact pins it
   const handleSelectFact = (factKey, sentenceIds = [], quote = '') => {
     if (activeFactKey === factKey) {
-      // Toggle off
       setActiveFactKey(null);
       setActiveSentenceIds([]);
       setActiveQuotes([]);
@@ -63,16 +86,15 @@ export default function App() {
       setSelectedSentenceId(null);
     } else {
       setSelectedSentenceId(sentenceId);
-      // Find all facts connected to this sentence
-      const matchingFacts = [];
+      const matchingQuotes = [];
       (report.charges || []).forEach(ch => {
         (ch.facts || []).forEach(f => {
-          if (f.sentence_ids && f.sentence_ids.includes(sentenceId)) {
-            matchingFacts.push(f.quote);
+          if (f.sentence_ids && f.sentence_ids.includes(sentenceId) && f.quote) {
+            matchingQuotes.push(f.quote);
           }
         });
       });
-      setActiveQuotes(matchingFacts);
+      setActiveQuotes(matchingQuotes);
       setActiveSentenceIds([sentenceId]);
     }
   };
@@ -84,30 +106,44 @@ export default function App() {
     setSelectedSentenceId(null);
   };
 
-  // Submit custom narrative to backend POST /review
-  const handleAnalyzeCustom = async () => {
-    if (!customNarrative.trim()) return;
+  // POST narrative to Ethan's live backend: http://localhost:8000/review
+  const handleRunLiveReview = async () => {
+    if (!narrativeInput.trim()) return;
     setIsLoading(true);
     setApiError(null);
+    clearHighlights();
+
     try {
-      const response = await fetch('/review', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ narrative: customNarrative })
-      });
+      let response;
+      try {
+        // Direct call to Ethan's backend
+        response = await fetch(LIVE_API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ narrative: narrativeInput })
+        });
+      } catch (directErr) {
+        // Fallback to Vite proxy (/review)
+        response = await fetch('/review', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ narrative: narrativeInput })
+        });
+      }
 
       if (!response.ok) {
-        throw new Error(`API responded with status ${response.status}: ${response.statusText}`);
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
       const data = await response.json();
       setReport(data);
-      setSelectedPresetId('custom');
-      setIsCustomModalOpen(false);
-      clearHighlights();
+      setSelectedPresetId('custom_live');
+      setShowLiveEditor(false);
     } catch (err) {
-      console.warn('Backend /review not reachable or error occurred:', err);
-      setApiError(`Could not reach backend API (${err.message}). Is Ethan's backend running on http://localhost:8000? You can continue testing with the built-in preset cases.`);
+      console.error('API /review request error:', err);
+      setApiError(
+        `Unable to connect to live review backend at ${LIVE_API_URL}. Is Ethan's server running? (Run: uvicorn backend.app:app --port 8000). Error: ${err.message}`
+      );
     } finally {
       setIsLoading(false);
     }
@@ -122,7 +158,7 @@ export default function App() {
 
   return (
     <div className="app-container">
-      {/* Top Navigation / Brand */}
+      {/* Top Header */}
       <header className="app-header">
         <div className="header-brand">
           <div className="brand-logo">
@@ -133,13 +169,13 @@ export default function App() {
           </div>
           <div>
             <h1 className="brand-title">CBP Investigative Narrative Gap Analysis</h1>
-            <p className="brand-subtitle">Challenge+X · Unissant UC3 · Team TNUX (Rules-as-Code Engine)</p>
+            <p className="brand-subtitle">Challenge+X · Unissant UC3 · Team TNUX (Neuro-Symbolic Review Engine)</p>
           </div>
         </div>
 
         <div className="header-controls">
           <div className="preset-selector-box">
-            <label htmlFor="preset-select">Active Case:</label>
+            <label htmlFor="preset-select">Preset Case:</label>
             <select
               id="preset-select"
               value={selectedPresetId}
@@ -149,28 +185,119 @@ export default function App() {
               {DEMO_PRESETS.map(p => (
                 <option key={p.id} value={p.id}>{p.title}</option>
               ))}
-              {selectedPresetId === 'custom' && (
-                <option value="custom">Custom Live Review</option>
+              {selectedPresetId === 'custom_live' && (
+                <option value="custom_live">Live Review Result (gpt-oss-20b)</option>
               )}
             </select>
           </div>
 
           <button
-            className="btn-primary"
-            onClick={() => setIsCustomModalOpen(true)}
-            title="Paste or enter a new narrative to review"
+            className={`btn-primary ${showLiveEditor ? 'btn-active' : ''}`}
+            onClick={() => setShowLiveEditor(!showLiveEditor)}
+            title="Toggle live narrative input editor"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <line x1="12" y1="5" x2="12" y2="19"></line>
               <line x1="5" y1="12" x2="19" y2="12"></line>
             </svg>
-            Review New Narrative
+            {showLiveEditor ? 'Close Live Editor' : 'Live Narrative Review'}
           </button>
         </div>
       </header>
 
-      {/* Mandatory Disclaimer Banner */}
+      {/* Official Disclaimer Guardrail Banner */}
       <DisclaimerBanner disclaimer={report.disclaimer} />
+
+      {/* Live Narrative Input Drawer / Banner */}
+      {showLiveEditor && (
+        <section className="live-editor-section">
+          <div className="editor-card">
+            <div className="editor-header">
+              <div className="editor-title">
+                <span className="live-pulse-dot"></span>
+                <strong>Live Narrative Review Endpoint</strong>
+                <code>POST http://localhost:8000/review</code>
+              </div>
+              <div className="quick-fill-chips">
+                <span className="quick-fill-label">Load Template:</span>
+                <button
+                  type="button"
+                  className="quick-fill-btn"
+                  onClick={() => setNarrativeInput(Object.values(DEMO_PRESETS[1].data.sentences).join(' '))}
+                >
+                  Clean Case
+                </button>
+                <button
+                  type="button"
+                  className="quick-fill-btn"
+                  onClick={() => setNarrativeInput(Object.values(DEMO_PRESETS[0].data.sentences).join(' '))}
+                >
+                  Gaps Case
+                </button>
+                <button
+                  type="button"
+                  className="quick-fill-btn"
+                  onClick={() => setNarrativeInput(Object.values(DEMO_PRESETS[2].data.sentences).join(' '))}
+                >
+                  Contradiction Case
+                </button>
+                <button
+                  type="button"
+                  className="quick-fill-btn"
+                  onClick={() => setNarrativeInput(Object.values(DEMO_PRESETS[3].data.sentences).join(' '))}
+                >
+                  Uncovered Charge
+                </button>
+              </div>
+            </div>
+
+            <textarea
+              className="live-narrative-textarea"
+              rows={5}
+              placeholder="Paste or edit an investigative officer narrative here..."
+              value={narrativeInput}
+              onChange={(e) => setNarrativeInput(e.target.value)}
+              disabled={isLoading}
+            />
+
+            <div className="editor-actions">
+              <span className="live-hint">
+                Sends narrative to Ethan's FastAPI endpoint & Unissant's hosted <code>gpt-oss-20b</code> model.
+              </span>
+              <button
+                className="btn-run-review"
+                onClick={handleRunLiveReview}
+                disabled={isLoading || !narrativeInput.trim()}
+              >
+                {isLoading ? `Analyzing (${elapsedSeconds}s)...` : '⚡ Run Review (POST /review)'}
+              </button>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Loading Banner Overlay */}
+      {isLoading && (
+        <div className="loading-banner" role="status">
+          <div className="spinner"></div>
+          <div className="loading-text">
+            <strong>Running GenAI Fact Extraction & Gap Analysis...</strong>
+            <span>Contacting Unissant hosted <code>gpt-oss-20b</code> via Ethan's backend ({elapsedSeconds}s elapsed · typical review 5–15s)</span>
+          </div>
+        </div>
+      )}
+
+      {/* Error Alert Banner */}
+      {apiError && (
+        <div className="api-error-banner" role="alert">
+          <div className="error-icon">⚠️</div>
+          <div className="error-body">
+            <strong>Live API Connection Notice</strong>
+            <p>{apiError}</p>
+          </div>
+          <button className="btn-dismiss" onClick={() => setApiError(null)}>✕</button>
+        </div>
+      )}
 
       {/* System Metrics Bar */}
       <div className="metrics-bar">
@@ -197,9 +324,9 @@ export default function App() {
           </span>
         </div>
         <div className="metric-chip">
-          <span className="metric-label">Human Review Needed</span>
+          <span className="metric-label">Human Review Routing</span>
           <span className={`metric-value ${humanReviewCount > 0 ? 'text-purple' : 'text-slate'}`}>
-            {humanReviewCount > 0 ? 'Yes' : 'No'}
+            {humanReviewCount > 0 ? 'Routed to Human' : 'Auto-Resolved'}
           </span>
         </div>
 
@@ -261,60 +388,6 @@ export default function App() {
           </div>
         </section>
       </main>
-
-      {/* Modal for Custom Narrative Input */}
-      {isCustomModalOpen && (
-        <div className="modal-overlay" onClick={() => setIsCustomModalOpen(false)}>
-          <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>Analyze Investigative Narrative</h3>
-              <button className="btn-close" onClick={() => setIsCustomModalOpen(false)}>✕</button>
-            </div>
-            <div className="modal-body">
-              <p className="modal-desc">
-                Paste or write a free-text CBP narrative. The backend endpoint (<code>POST /review</code>) will extract facts using <code>gpt-oss-20b</code> and execute the deterministic gap & contradiction rules.
-              </p>
-              {apiError && (
-                <div className="modal-alert-error">
-                  {apiError}
-                </div>
-              )}
-              <textarea
-                className="narrative-textarea"
-                rows={8}
-                placeholder="Example: SUBJECT MARIA ELENA TORRES-VEGA is a native and citizen of Guatemala. Border Patrol agents encountered subject near Hidalgo, TX... Inadmissible under INA 212(a)(6)(A)(i)..."
-                value={customNarrative}
-                onChange={(e) => setCustomNarrative(e.target.value)}
-              />
-            </div>
-            <div className="modal-footer">
-              <button
-                className="btn-secondary"
-                onClick={() => {
-                  setCustomNarrative("INADMISSIBILITY: 'John Doe' a citizen of Mexico. He has never had any documents that would allow him to be, or remain, in the United States legally. 'John Doe' is inadmissible under section 212(a)(6)(A)(i) of the INA, in that he entered the United States at a place not designated by the Attorney General and was not then admitted or paroled after inspection by an immigration officer. Subject is inadmissible under Section 212(A)(9)(A)(I) of the Immigration and Nationality Act, as amended, in that he was previously ordered removed and entered or attempted to enter without being admitted.");
-                }}
-              >
-                Insert Sample Narrative
-              </button>
-              <div className="modal-footer-right">
-                <button
-                  className="btn-cancel"
-                  onClick={() => setIsCustomModalOpen(false)}
-                >
-                  Cancel
-                </button>
-                <button
-                  className="btn-primary"
-                  onClick={handleAnalyzeCustom}
-                  disabled={isLoading || !customNarrative.trim()}
-                >
-                  {isLoading ? 'Running Gap Analysis...' : 'Run Analysis'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
