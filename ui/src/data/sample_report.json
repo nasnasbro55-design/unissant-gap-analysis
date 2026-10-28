@@ -1,0 +1,141 @@
+{
+  "version": "1",
+  "model": "gpt-oss-20b",
+  "prompt_version": "v4",
+  "votes": 1,
+  "disclaimer": "Flags missing documentation only. It does not judge the case or suggest charges. A person reviews every result.",
+  "sentences": {
+    "S1": "INADMISSIBILITY: 'John Doe' a citizen of Mexico.",
+    "S2": "He has never had any documents that would allow him to be, or remain, in the United States legally.",
+    "S3": "'John Doe' is inadmissible under section 212(a) (6) (A) (i) of the INA, in that he entered the United States at a place not designated by the Attorney General and was not then admitted or paroled after inspection by an immigration officer.",
+    "S4": "INADMISSIBILITY: Subject is inadmissible under Section 212(A) (9) (A) (I) of the Immigration and Nationality Act, as amended, in that he was previously ordered removed and entered or attempted to enter without being admitted.",
+    "S5": "REMOVABILITY: Subject is removable under Section 212 because he was found inadmissible as an arriving alien in proceedings under section 235(b)l of the Act."
+  },
+  "seconds": 5.4,
+  "charges": [
+    {
+      "citation": "212(a)(6)(A)(i)",
+      "name": "Present without admission or parole",
+      "source": "INA 212(a)(6)(A)(i); USCIS Policy Manual Vol. 7, Part L, Ch. 3",
+      "status": "gaps",
+      "reason": null,
+      "facts": [
+        {
+          "fact_type": "subject_identity",
+          "label": "subject identity",
+          "found": true,
+          "quote": "John Doe",
+          "sentence_ids": [
+            "S1"
+          ],
+          "confidence": "high"
+        },
+        {
+          "fact_type": "country_of_citizenship",
+          "label": "country of citizenship",
+          "found": true,
+          "quote": "a citizen of Mexico",
+          "sentence_ids": [
+            "S1"
+          ],
+          "confidence": "high"
+        },
+        {
+          "fact_type": "manner_of_entry",
+          "label": "manner of entry",
+          "found": true,
+          "quote": "entered the United States at a place not designated by the Attorney General",
+          "sentence_ids": [
+            "S3"
+          ],
+          "confidence": "high"
+        },
+        {
+          "fact_type": "place_of_entry",
+          "label": "place of entry",
+          "found": false,
+          "quote": null,
+          "sentence_ids": [],
+          "confidence": null
+        },
+        {
+          "fact_type": "admitted_or_paroled_status",
+          "label": "admitted or paroled status",
+          "found": true,
+          "quote": "was not then admitted or paroled",
+          "sentence_ids": [
+            "S3"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "missing": [
+        "place_of_entry"
+      ],
+      "conflicts": [],
+      "disagreed": []
+    },
+    {
+      "citation": "212(a)(9)(A)(i)",
+      "name": "Prior removal, reentry without admission",
+      "source": "INA 212(a)(9)(A)(i); USCIS Policy Manual Vol. 7, Part L, Ch. 3",
+      "status": "gaps",
+      "reason": null,
+      "facts": [
+        {
+          "fact_type": "subject_identity",
+          "label": "subject identity",
+          "found": true,
+          "quote": "John Doe",
+          "sentence_ids": [
+            "S1"
+          ],
+          "confidence": "high"
+        },
+        {
+          "fact_type": "prior_removal_order",
+          "label": "prior removal order",
+          "found": true,
+          "quote": "previously ordered removed",
+          "sentence_ids": [
+            "S4"
+          ],
+          "confidence": "high"
+        },
+        {
+          "fact_type": "prior_removal_date",
+          "label": "prior removal date",
+          "found": false,
+          "quote": null,
+          "sentence_ids": [],
+          "confidence": null
+        },
+        {
+          "fact_type": "reentry_or_attempted_reentry",
+          "label": "reentry or attempted reentry",
+          "found": true,
+          "quote": "entered or attempted to enter",
+          "sentence_ids": [
+            "S4"
+          ],
+          "confidence": "high"
+        },
+        {
+          "fact_type": "admitted_status_at_reentry",
+          "label": "admitted status at reentry",
+          "found": true,
+          "quote": "without being admitted",
+          "sentence_ids": [
+            "S4"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "missing": [
+        "prior_removal_date"
+      ],
+      "conflicts": [],
+      "disagreed": []
+    }
+  ]
+}
