@@ -1,9 +1,12 @@
 """Builds the review result in the shape the front end and API use. See pipeline/schemas.py for the contract."""
-import time
+import os, time
+from concurrent.futures import ThreadPoolExecutor
 from extract import extract, split_sentences, VERSION
 from run_sample import gap_report, TABLE
 from review import review
 
+# hard limit per review: the client timeout covers each network wait, not the whole call
+DEADLINE, POOL = float(os.environ.get("REVIEW_DEADLINE", 50)), ThreadPoolExecutor(8)
 DISCLAIMER = "Flags missing documentation only. It does not judge the case or suggest charges. A person reviews every result."
 
 def build_report(text, votes=1, chat=None):
@@ -11,10 +14,10 @@ def build_report(text, votes=1, chat=None):
     out = {"version": "1", "model": "gpt-oss-20b", "prompt_version": VERSION, "votes": votes, "disclaimer": DISCLAIMER, "sentences": split_sentences(text)}
     try:
         if votes > 1:
-            gaps, runs = review(text, votes, chat)
+            gaps, runs = POOL.submit(review, text, votes, chat).result(timeout=DEADLINE)
             claims = runs[0][1]
         else:
-            _, claims, _ = extract(text, chat)
+            _, claims, _ = POOL.submit(extract, text, chat).result(timeout=DEADLINE)
             gaps = gap_report(out["sentences"], claims)
     except Exception as e:
         return dict(out, seconds=round(time.time() - t, 1), charges=[{"citation": None, "name": None, "source": None, "status": "human_review", "reason": f"model unavailable ({type(e).__name__}); review this narrative by hand", "facts": [], "missing": [], "conflicts": [], "disagreed": []}])
