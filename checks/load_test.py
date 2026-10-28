@@ -55,4 +55,4 @@ if __name__ == "__main__":
         print(f"{lv:>7} {sum(r[1] == 'ok' for r in res):>4} {sum(r[1] == 'unavailable' for r in res):>10} {len(errs):>6} {s[len(s) // 2]:>6.1f}s {s[int(0.95 * (len(s) - 1))]:>5.1f}s {s[-1]:>5.1f}s {sum(x > 60 for x in s):>8} {len(res) / wall * 60:>7.1f}")
         for e in sorted(set(errs)):
             print("        " + e)
-    print("\n'model down' = the 40s timeout fired and the review was sent to a human, which is the safe failure. 'errors' = the API itself failed.")
+    print("\n'model down' = the model could not be reached or took too long (timeout, missing key, server down), and the review was sent to a human. That is the safe failure. 'errors' = the API itself failed.")

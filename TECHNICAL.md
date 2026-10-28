@@ -164,6 +164,23 @@ What the blind run exposed, and the fix for each (all general rules, not edits t
 
 The sample narrative from Unissant gives the expected gaps (place of entry for 212(a)(6)(A)(i), prior removal date for 212(a)(9)(A)(i)) on every run.
 
+### Load test (Oct 28)
+
+`checks/load_test.py` against the `/review` API, 10 reviews per level, on the shared Unissant server:
+
+| Reviews at once | Median | Slowest | Reviews per minute | Failures |
+|---|---|---|---|---|
+| 1 | 5.2s | 9.8s | 11 | 0 |
+| 3 | 6.2s | 8.3s | 31 | 0 |
+| 6 | 7.4s | 10.2s | 42 | 0 |
+| 10 | 8.6s | 10.2s | 59 | 0 |
+
+With the model unreachable (tested by accident with a missing key), every review was returned as `human_review` with "model unavailable" instead of failing. Each API review also has a hard 50-second limit, so a slow server on showcase day cannot push a review past the 60-second goal.
+
+### Development rerun after the round 1 fixes (Oct 28)
+
+On all 36 hand-written cases: 34/36 passed, recall 16/16 (100%), false flags 2 of 18 (11%), routing 12/12. Metamorphic 58/60 with 0 false flags. Both remaining false flags (c07, n02) came from the model shortening quotes with "...", which is now accepted when every piece appears in order. Not yet re-measured after that fix.
+
 ### Known failures
 
 1. **Contradiction cases are not stable across runs.** v5 fixed x06 and passed all 8 on the first run, but x01, x03 and x04 changed between runs. Also, in 3 metamorphic cases v5 reported an admission status that had been deleted, possibly a side effect of asking for the stance. Watch both on the blind set.
@@ -218,7 +235,7 @@ The sample narrative from Unissant gives the expected gaps (place of entry for 2
 ### Product
 - [ ] `POST /review` endpoint wrapping `build_report` (Ethan).
 - [ ] React review screen: per-charge status, missing facts, highlighted quotes, disclaimer, no suggested charges (Huy).
-- [ ] Load check: several reviews at once against the shared server before showcase day.
+- [x] Load check: 10 at once, max 10.2s, no failures (see Load test).
 
 ### Showcase (Saturday 7 Nov)
 - [ ] Update README (open questions are out of date; list models used and where a human reviews output, per Unissant's guardrail).
