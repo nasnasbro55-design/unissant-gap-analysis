@@ -1,0 +1,6 @@
+{
+  "_about": "A claim of this fact type is kept only if its quote matches the pattern (case-insensitive). This stops the model from citing a sentence that does not actually state the fact, e.g. 'He re-entered the US' as admission status.",
+  "admitted_or_paroled_status": "admit|parol|inspect|\\bewi\\b",
+  "admitted_status_at_reentry": "admit|parol|inspect|\\bewi\\b",
+  "prior_removal_date": "\\d|\\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)"
+}

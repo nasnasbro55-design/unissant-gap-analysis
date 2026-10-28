@@ -148,6 +148,20 @@ Prompt v5, low reasoning, 3 parallel workers, 3 repeated runs, 60 metamorphic ca
 
 v5 against v4: v5 fixed the overstay contradiction (x06) and reached 8/8 routing, but scored 3 fewer metamorphic cases (54 to 51) and was slightly less stable. Several contradiction cases (x01, x03, x04) changed between runs, so the per-run counts printed by `--repeat` are the number to quote, not one run.
 
+### Blind test, round 1 (Jake's 15 cases, Oct 28)
+
+First run on cases written by a teammate who never saw the prompts, before any fix based on them: **12/15 passed**. Across all 36 hand-written cases: recall 13/16 (81%, goal 90%), false flags 4 of 17 (24%, goal at most 10%), routing 12/12, max latency 37s. The fixes below were made after this run, so Jake's cases are now development cases and Huy's 17 cases are the next blind test.
+
+What the blind run exposed, and the fix for each (all general rules, not edits to individual cases):
+
+| Failure | Cases | Fix |
+|---|---|---|
+| Model cites a sentence with no admission words as admission status ("He re-entered the US") | c05, j06, m1-022, m1-024, m1-043 | Code rule: an admission-status quote must contain admit, parole or inspect; a removal-date quote must contain a date (`checks/elements/fact_anchors.json`) |
+| Model fixes a typo inside its quote, so the exact-match check drops a correct fact | j11 | Accept a quote within a small spelling difference of the narrative text, and store the narrative's own text as evidence |
+| Lowercase names missed | m1-002, m1-008, m1-016 | Definition: names may be lowercase or all caps |
+| "Crossed the border near X" counted as how the subject entered | j05, m1-042 | Definition: saying the subject crossed or entered, without how, does not count |
+| Unexplained: fraud facts not extracted (c07), multi-charge manner (c11) | c07, c11 | Open |
+
 The sample narrative from Unissant gives the expected gaps (place of entry for 212(a)(6)(A)(i), prior removal date for 212(a)(9)(A)(i)) on every run.
 
 ### Known failures
@@ -188,7 +202,9 @@ The sample narrative from Unissant gives the expected gaps (place of entry for 2
 - [ ] Blind test cases from Huy and Jake (`cases_huy.jsonl`, `cases_jake.jsonl`), including contradictions and charges we do not cover.
 - [ ] Jake's review of the expected answers in `cases.jsonl`.
 - [x] Unissant answers: any model allowed (no effect on scoring); approximate location counts as place of entry.
+- [x] Jake's blind cases: first run 12/15, fixes made (see Blind test, round 1).
 - [ ] Huy's blind cases (`cases_huy.jsonl`) and React UI (`ui/`) pushed to main.
+- [ ] First run on Huy's cases as the round 2 blind test, with no changes in between.
 - [ ] Write test cases in the style of the public redacted CBP I-213 narratives Unissant shared, with fictional names and places.
 
 ### Pipeline
