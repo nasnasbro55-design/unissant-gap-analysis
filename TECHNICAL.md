@@ -59,7 +59,7 @@ evidence-first report (JSON)    -> every line points to a statute element, a quo
 
 Steps 2 to 5 are plain code, so the same facts always give the same report. This is what makes results consistent across officers and stations, which is one of Unissant's stated goals. The research angle is "rules as code" / neuro-symbolic compliance checking: the LLM handles messy language, deterministic rules make the decision.
 
-The model is Unissant's hosted gpt-oss-20b. We use only that model, and we are confirming with Unissant whether outside models are allowed.
+The model is Unissant's hosted gpt-oss-20b. Unissant allows any model and says model choice does not affect scoring. We use only gpt-oss-20b.
 
 ---
 
@@ -156,7 +156,7 @@ The sample narrative from Unissant gives the expected gaps (place of entry for 2
 2. **Lowercase names.** In all-lowercase narratives the model sometimes misses the subject's name.
 3. **"Entered near X" counted as how they entered.** When the manner of entry is not stated, the model sometimes counts the place sentence as manner.
 4. **Shared quotes in multi-charge narratives (c11).** One phrase that should cover several facts misses manner of entry.
-5. **Definition questions, pending Unissant:** whether the place where the subject was encountered counts as place of entry (c01, c13), and whether "never inspected" counts as an admission status (c08). These are tagged ambiguous.
+5. **Definition questions, settled.** Unissant confirmed an approximate location like "near Brownsville, TX" counts as place of entry, so c01 and c13 are now normal cases expected complete. "Never inspected by an immigration officer" counts as stating admission status (Jake's rule from his blind cases), so c08 now expects complete.
 
 ### Prompt history
 
@@ -187,13 +187,15 @@ The sample narrative from Unissant gives the expected gaps (place of entry for 2
 ### Waiting on others
 - [ ] Blind test cases from Huy and Jake (`cases_huy.jsonl`, `cases_jake.jsonl`), including contradictions and charges we do not cover.
 - [ ] Jake's review of the expected answers in `cases.jsonl`.
-- [ ] Unissant answers: outside models allowed? Does the encounter location count as place of entry?
+- [x] Unissant answers: any model allowed (no effect on scoring); approximate location counts as place of entry.
+- [ ] Huy's blind cases (`cases_huy.jsonl`) and React UI (`ui/`) pushed to main.
+- [ ] Write test cases in the style of the public redacted CBP I-213 narratives Unissant shared, with fictional names and places.
 
 ### Pipeline
 - [x] Live-test v5 against v4. v5 is the default (fixed x06, n01 not broken, small metamorphic cost).
 - [ ] Re-run v5 with `--repeat 3` to get per-case pass counts across runs, especially for x01 to x06.
 - [ ] After the blind set: address known failures 2 to 4, re-score, and record the result.
-- [ ] Fix the citation pattern so 5-level cites like `212(a)(7)(A)(i)(I)` are read in full.
+- [x] Fix the citation pattern so 3- to 5-level cites (`212(a)(2)(B)`, `212(a)(2)(A)(i)(II)`) are read in full.
 - [ ] Add 1 or 2 more common charges (for example 212(a)(7)(A)(i)(I), no valid entry documents), checked against the statute and marked for Unissant to confirm.
 - [ ] Decide on voting after testing more independent runs.
 

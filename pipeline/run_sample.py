@@ -3,7 +3,7 @@ from extract import extract, ROOT
 
 TABLE = json.loads((ROOT / "checks/elements/charge_elements.json").read_text())
 KEYS = {re.sub(r"\s+", "", k.lower()): k for k in TABLE}
-CITE = r"212\s*\(\s*a\s*\)\s*\(\s*\d+\s*\)\s*\(\s*\w\s*\)\s*\(\s*\w+\s*\)"
+CITE = r"212\s*\(\s*a\s*\)\s*\(\s*\d+\s*\)(?:\s*\(\s*[A-Za-z]{1,4}\s*\)){1,3}"
 EXPECTED = {"212(a)(6)(A)(i)": ["place_of_entry"], "212(a)(9)(A)(i)": ["prior_removal_date"]}
 
 def gap_report(sents, claims):
