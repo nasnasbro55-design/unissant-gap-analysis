@@ -59,7 +59,7 @@ evidence-first report (JSON)    -> every line points to a statute element, a quo
 
 Steps 2 to 5 are plain code, so the same facts always give the same report. This is what makes results consistent across officers and stations, which is one of Unissant's stated goals. The research angle is "rules as code" / neuro-symbolic compliance checking: the LLM handles messy language, deterministic rules make the decision.
 
-The model is Unissant's hosted gpt-oss-20b. We use only that model, and we are confirming with Unissant whether outside models are allowed.
+The model is Unissant's hosted gpt-oss-20b. Unissant allows any model and says model choice does not affect scoring. We use only gpt-oss-20b.
 
 ---
 
@@ -148,7 +148,38 @@ Prompt v5, low reasoning, 3 parallel workers, 3 repeated runs, 60 metamorphic ca
 
 v5 against v4: v5 fixed the overstay contradiction (x06) and reached 8/8 routing, but scored 3 fewer metamorphic cases (54 to 51) and was slightly less stable. Several contradiction cases (x01, x03, x04) changed between runs, so the per-run counts printed by `--repeat` are the number to quote, not one run.
 
+### Blind test, round 1 (Jake's 15 cases, Oct 28)
+
+First run on cases written by a teammate who never saw the prompts, before any fix based on them: **12/15 passed**. Across all 36 hand-written cases: recall 13/16 (81%, goal 90%), false flags 4 of 17 (24%, goal at most 10%), routing 12/12, max latency 37s. The fixes below were made after this run, so Jake's cases are now development cases and Huy's 17 cases are the next blind test.
+
+What the blind run exposed, and the fix for each (all general rules, not edits to individual cases):
+
+| Failure | Cases | Fix |
+|---|---|---|
+| Model cites a sentence with no admission words as admission status ("He re-entered the US") | c05, j06, m1-022, m1-024, m1-043 | Code rule: an admission-status quote must contain admit, parole or inspect; a removal-date quote must contain a date (`checks/elements/fact_anchors.json`) |
+| Model fixes a typo inside its quote, so the exact-match check drops a correct fact | j11 | Accept a quote within a small spelling difference of the narrative text, and store the narrative's own text as evidence |
+| Lowercase names missed | m1-002, m1-008, m1-016 | Definition: names may be lowercase or all caps |
+| "Crossed the border near X" counted as how the subject entered | j05, m1-042 | Definition: saying the subject crossed or entered, without how, does not count |
+| Unexplained: fraud facts not extracted (c07), multi-charge manner (c11) | c07, c11 | Open |
+
 The sample narrative from Unissant gives the expected gaps (place of entry for 212(a)(6)(A)(i), prior removal date for 212(a)(9)(A)(i)) on every run.
+
+### Load test (Oct 28)
+
+`checks/load_test.py` against the `/review` API, 10 reviews per level, on the shared Unissant server:
+
+| Reviews at once | Median | Slowest | Reviews per minute | Failures |
+|---|---|---|---|---|
+| 1 | 5.2s | 9.8s | 11 | 0 |
+| 3 | 6.2s | 8.3s | 31 | 0 |
+| 6 | 7.4s | 10.2s | 42 | 0 |
+| 10 | 8.6s | 10.2s | 59 | 0 |
+
+With the model unreachable (tested by accident with a missing key), every review was returned as `human_review` with "model unavailable" instead of failing. Each API review also has a hard 50-second limit, so a slow server on showcase day cannot push a review past the 60-second goal.
+
+### Development rerun after the round 1 fixes (Oct 28)
+
+On all 36 hand-written cases: 34/36 passed, recall 16/16 (100%), false flags 2 of 18 (11%), routing 12/12. Metamorphic 58/60 with 0 false flags. Both remaining false flags (c07, n02) came from the model shortening quotes with "...", which is now accepted when every piece appears in order. Not yet re-measured after that fix.
 
 ### Known failures
 
@@ -156,7 +187,7 @@ The sample narrative from Unissant gives the expected gaps (place of entry for 2
 2. **Lowercase names.** In all-lowercase narratives the model sometimes misses the subject's name.
 3. **"Entered near X" counted as how they entered.** When the manner of entry is not stated, the model sometimes counts the place sentence as manner.
 4. **Shared quotes in multi-charge narratives (c11).** One phrase that should cover several facts misses manner of entry.
-5. **Definition questions, pending Unissant:** whether the place where the subject was encountered counts as place of entry (c01, c13), and whether "never inspected" counts as an admission status (c08). These are tagged ambiguous.
+5. **Definition questions, settled.** Unissant confirmed an approximate location like "near Brownsville, TX" counts as place of entry, so c01 and c13 are now normal cases expected complete. "Never inspected by an immigration officer" counts as stating admission status (Jake's rule from his blind cases), so c08 now expects complete.
 
 ### Prompt history
 
@@ -187,20 +218,24 @@ The sample narrative from Unissant gives the expected gaps (place of entry for 2
 ### Waiting on others
 - [ ] Blind test cases from Huy and Jake (`cases_huy.jsonl`, `cases_jake.jsonl`), including contradictions and charges we do not cover.
 - [ ] Jake's review of the expected answers in `cases.jsonl`.
-- [ ] Unissant answers: outside models allowed? Does the encounter location count as place of entry?
+- [x] Unissant answers: any model allowed (no effect on scoring); approximate location counts as place of entry.
+- [x] Jake's blind cases: first run 12/15, fixes made (see Blind test, round 1).
+- [ ] Huy's blind cases (`cases_huy.jsonl`) and React UI (`ui/`) pushed to main.
+- [ ] First run on Huy's cases as the round 2 blind test, with no changes in between.
+- [ ] Write test cases in the style of the public redacted CBP I-213 narratives Unissant shared, with fictional names and places.
 
 ### Pipeline
 - [x] Live-test v5 against v4. v5 is the default (fixed x06, n01 not broken, small metamorphic cost).
 - [ ] Re-run v5 with `--repeat 3` to get per-case pass counts across runs, especially for x01 to x06.
 - [ ] After the blind set: address known failures 2 to 4, re-score, and record the result.
-- [ ] Fix the citation pattern so 5-level cites like `212(a)(7)(A)(i)(I)` are read in full.
+- [x] Fix the citation pattern so 3- to 5-level cites (`212(a)(2)(B)`, `212(a)(2)(A)(i)(II)`) are read in full.
 - [ ] Add 1 or 2 more common charges (for example 212(a)(7)(A)(i)(I), no valid entry documents), checked against the statute and marked for Unissant to confirm.
 - [ ] Decide on voting after testing more independent runs.
 
 ### Product
 - [ ] `POST /review` endpoint wrapping `build_report` (Ethan).
 - [ ] React review screen: per-charge status, missing facts, highlighted quotes, disclaimer, no suggested charges (Huy).
-- [ ] Load check: several reviews at once against the shared server before showcase day.
+- [x] Load check: 10 at once, max 10.2s, no failures (see Load test).
 
 ### Showcase (Saturday 7 Nov)
 - [ ] Update README (open questions are out of date; list models used and where a human reviews output, per Unissant's guardrail).

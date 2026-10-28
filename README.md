@@ -2,6 +2,8 @@
 
 **Status:** Building (Weeks 5-6 of Challenge+X). The core pipeline, contradiction check, and evaluation harness work end to end against Unissant's hosted model. Front end, API, and blind testing are in progress. Full technical details, results, and the to-do list are in **[TECHNICAL.md](TECHNICAL.md)**.
 
+**Showcase deck:** [TNUX Unissant Showcase Deck](https://claude.ai/artifact/SeZeysx3uUsC2kKFWLdPXF) (shared with the team; a PDF copy goes in `docs/` before the showcase).
+
 This project is part of Challenge+X, Round 3, sponsored by **Unissant** (use case UC3).
 
 ## The problem
@@ -46,7 +48,7 @@ Synthetic and fictional data only. No real case records or names anywhere in thi
 
 ## Models and human review
 
-- **Model:** `gpt-oss-20b`, hosted by Unissant. No other model is used.
+- **Model:** `gpt-oss-20b`, hosted by Unissant. No other model is used. (Unissant allows any model; choice does not affect scoring.)
 - **Where a human reviews:** every result is shown to a person. Cases are explicitly routed to a person when a fact is unclear, a conflict is found, the charge is not in our table, no charge is cited, repeated runs disagree, or the model is unavailable.
 
 ## Quick start
@@ -85,13 +87,12 @@ Start the review API with `uvicorn backend.app:app`. Send `POST /review` a JSON 
 ## Open questions
 
 Resolved:
-- ~~Which models are approved~~: Unissant provided hosted gpt-oss-20b.
+- ~~Which models are approved~~: Unissant provided hosted gpt-oss-20b, and teams may use any model or tool. Model choice does not affect scoring. We use gpt-oss-20b.
+- ~~Does an encounter location count as place of entry~~: yes. An approximate location like "near Brownsville, TX" is acceptable (Unissant, Oct 27).
 - ~~Narrative format~~: free text, not structured data.
 - ~~Can the tool suggest charges~~: no.
 
-Still open (asked Unissant):
-- Are outside models allowed alongside the hosted one?
-- Does the place where a subject was encountered count as place of entry, or must it be the crossing point?
+Still open:
 - How is a flag scored that is not in Unissant's answer key but is arguably valid?
 - How large is the evaluation set beyond the sample?
 

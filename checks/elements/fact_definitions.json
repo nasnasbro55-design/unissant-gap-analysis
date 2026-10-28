@@ -1,8 +1,8 @@
 {
-  "subject_identity": "The subject is named or identified (a name or placeholder name counts).",
+  "subject_identity": "The subject is named or identified (a name or placeholder name counts). Names may be written in lowercase or all caps.",
   "country_of_citizenship": "The subject's country of citizenship or nationality is stated.",
-  "manner_of_entry": "How the subject entered the United States (for example without inspection, or at a place not designated for entry).",
-  "place_of_entry": "The specific place where the subject entered (a port of entry, city, or named border location). A general statement that the place was 'not designated' does NOT count.",
+  "manner_of_entry": "How the subject entered the United States (for example without inspection, or at a place not designated for entry). Only saying the subject crossed or entered, without saying how, does NOT count.",
+  "place_of_entry": "Where the subject entered, or approximately where (a port of entry, city, or border location). An approximate location such as 'near Brownsville, TX', including where Border Patrol encountered the subject near the border, counts. A general statement that the place was 'not designated' does NOT count.",
   "admitted_or_paroled_status": "Whether the subject was or was not admitted or paroled.",
   "prior_removal_order": "The subject was previously ordered removed, deported, or excluded.",
   "prior_removal_date": "The date (at least month and year) of the prior removal order or removal.",

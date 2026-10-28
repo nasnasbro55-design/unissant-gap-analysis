@@ -44,6 +44,8 @@ if __name__ == "__main__":
     ap.add_argument("--seed", type=int, default=1, help="seed for --meta")
     ap.add_argument("--only", default="", help="comma-separated case ids")
     a = ap.parse_args()
+    if not os.environ.get("CHALLENGEX_API_KEY"):
+        sys.exit("CHALLENGEX_API_KEY is not set in this Terminal window. Set it first (see README), then rerun.")
     VOTES = a.votes
     cases = [json.loads(l) for f in sorted(HERE.glob("cases*.jsonl")) for l in f.read_text().splitlines() if l.strip()]
     if a.meta:

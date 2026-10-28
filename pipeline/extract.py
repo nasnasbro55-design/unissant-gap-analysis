@@ -1,9 +1,11 @@
 import json, os, re, pathlib
+from difflib import SequenceMatcher
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 VERSION = os.environ.get("PROMPT_VERSION", "v5")
 FACTS = json.loads((ROOT / "checks/elements/fact_definitions.json").read_text())
 SYSTEM = (ROOT / f"pipeline/prompts/extract_{VERSION}.txt").read_text().replace("{fact_definitions}", "\n".join(f"- {k}: {v}" for k, v in FACTS.items()))
+ANCHOR = {k: v for k, v in json.loads((ROOT / "checks/elements/fact_anchors.json").read_text()).items() if not k.startswith("_")}
 ABBR = re.compile(r"(?:^|\s)(?:[A-Z]|Mr|Mrs|Ms|Dr|Sr|Jr|St|Subj)\.$")
 norm = lambda s: " ".join(str(s or "").split()).lower()
 
@@ -21,6 +23,21 @@ def locate(quote, sents):
     i = full.find(q) if q else -1
     return [] if i < 0 else [k for k, (a, b) in spans.items() if a < i + len(q) and i < b]
 
+def locate_parts(quote, sents):
+    """A quote shortened with '...' is kept if every piece appears in the narrative, in order."""
+    parts, full, pos, ids = [p for p in re.split(r"\s*(?:\.{3}|\u2026)\s*", str(quote or "")) if p.strip()], " ".join(norm(v) for v in sents.values()), 0, []
+    for p in parts if len(parts) > 1 else []:
+        if (i := full.find(norm(p), pos)) < 0:
+            return []
+        pos, ids = i + len(norm(p)), ids + [k for k in locate(p, sents) if k not in ids]
+    return ids
+
+def fuzzy(quote, text):
+    """Find the narrative span closest to a quote the model slightly misspelled or corrected (e.g. fixed a typo)."""
+    w, q = text.split(), str(quote or "").lower().split()
+    r, i = max(((SequenceMatcher(None, " ".join(w[i:i + len(q)]).lower(), " ".join(q)).ratio(), i) for i in range(len(w) - len(q) + 1)), default=(0, 0))
+    return " ".join(w[i:i + len(q)]) if len(q) >= 2 and r >= 0.85 else None
+
 def extract(text, chat=None):
     if chat is None:
         from llm_client import chat
@@ -36,6 +53,12 @@ def extract(text, chat=None):
     m = re.search(r"\{.*\}", raw or "", re.S)
     if not m:
         raise ValueError("model returned no JSON: " + (raw or "")[:200])
-    claims = [dict(c, sentence_ids=locate(c.get("quote"), sents)) for c in json.loads(m.group(0)).get("claims", []) if isinstance(c, dict)]
-    good = lambda c: c.get("fact_type") in FACTS and c.get("confidence") in ("high", "medium", "low") and bool(c["sentence_ids"])
+    claims = []
+    for c in (c for c in json.loads(m.group(0)).get("claims", []) if isinstance(c, dict)):
+        ids = locate(c.get("quote"), sents) or locate_parts(c.get("quote"), sents)
+        if not ids and (span := fuzzy(c.get("quote"), text)):
+            c, ids = dict(c, quote=span, quote_corrected=True), locate(span, sents)
+        claims.append(dict(c, sentence_ids=ids))
+    good = lambda c: (c.get("fact_type") in FACTS and c.get("confidence") in ("high", "medium", "low") and bool(c["sentence_ids"])
+                      and bool(re.search(ANCHOR.get(c["fact_type"], ""), str(c.get("quote")), re.I)))
     return sents, [c for c in claims if good(c)], [c for c in claims if not good(c)]
