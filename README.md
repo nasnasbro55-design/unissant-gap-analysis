@@ -58,6 +58,7 @@ pip install -r requirements.txt
 export CHALLENGEX_API_KEY=...          # never commit the key
 python3 pipeline/run_sample.py 3       # check Unissant's sample narrative
 python3 checks/eval/run_eval.py --workers 3 --repeat 3 --meta 60
+python3 pipeline/batch.py checks/eval/cases_huy_cbp.jsonl --out reports   # one-page report per narrative
 ```
 
 How to add test cases: [checks/eval/README.md](checks/eval/README.md). Report format for the front end: `pipeline/schemas.py` and `backend/sample_report.json`.
