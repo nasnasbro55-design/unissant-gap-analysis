@@ -75,6 +75,8 @@ if __name__ == "__main__":
     ap.add_argument("--out", default="reports")
     ap.add_argument("--workers", type=int, default=3)
     a = ap.parse_args()
+    if not __import__("os").environ.get("CHALLENGEX_API_KEY"):
+        sys.exit("CHALLENGEX_API_KEY is not set in this Terminal window. Set it first (see README), then rerun.")
     items, out = load(a.input), pathlib.Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
     safe = lambda s: re.sub(r"[^A-Za-z0-9_.-]+", "_", s)[:80] or "narrative"
