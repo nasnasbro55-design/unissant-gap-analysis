@@ -325,8 +325,8 @@ export default function App() {
         </div>
         <div className="metric-chip">
           <span className="metric-label">Human Review Routing</span>
-          <span className={`metric-value ${humanReviewCount > 0 ? 'text-purple' : 'text-slate'}`}>
-            {humanReviewCount > 0 ? 'Routed to Human' : 'Auto-Resolved'}
+          <span className={`metric-value ${(report.human_review || humanReviewCount > 0) ? 'text-purple' : 'text-slate'}`}>
+            {(report.human_review || humanReviewCount > 0) ? (report.multiple_charges ? 'Routed to Human (multi-charge)' : 'Routed to Human') : 'Auto-Resolved'}
           </span>
         </div>
 

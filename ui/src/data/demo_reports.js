@@ -14,7 +14,7 @@ export const DEMO_PRESETS = [
     data: {
       version: "1",
       model: "gpt-oss-20b",
-      prompt_version: "v4",
+      prompt_version: "v5",
       votes: 1,
       seconds: 4.8,
       disclaimer: "Flags missing documentation only. It does not judge the case or suggest charges. A person reviews every result.",
@@ -87,7 +87,7 @@ export const DEMO_PRESETS = [
     data: {
       version: "1",
       model: "gpt-oss-20b",
-      prompt_version: "v4",
+      prompt_version: "v5",
       votes: 1,
       seconds: 5.1,
       disclaimer: "Flags missing documentation only. It does not judge the case or suggest charges. A person reviews every result.",
@@ -151,7 +151,7 @@ export const DEMO_PRESETS = [
     data: {
       version: "1",
       model: "gpt-oss-20b",
-      prompt_version: "v4",
+      prompt_version: "v5",
       votes: 1,
       seconds: 3.2,
       disclaimer: "Flags missing documentation only. It does not judge the case or suggest charges. A person reviews every result.",
