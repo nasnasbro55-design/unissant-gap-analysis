@@ -179,7 +179,13 @@ A line-by-line check of the brief found requirements we had not covered. Added:
 - **A separate citation check per charge**: supported, incomplete, likely mismatch, needs review, or not in reference table.
 - **Batch mode with one-page reports** (`pipeline/batch.py`): the test bed asks for a one-page gap report for each of 25 to 50 narratives.
 
-Not built: internal consistency checks (for example a removal date after the reentry date), checks against the I-213/I-44 form structure, and separate case-fact fields.
+Added Nov 6–7 (night before the showcase):
+- **Internal consistency checks** in code (`pipeline/consistency.py`): impossible dates, future dates, a prior removal dated after the reentry, and two different countries of citizenship. Each is a flag with a reason and sentence, and the case goes to a person. None of the 63 test cases or the Unissant sample triggers a false one.
+- **Manner-of-entry rule**: a manner quote must say how the subject entered. "Not inspected, admitted or paroled" alone is admission status, not manner (behind h11, hc06, j05). Checked against all 63 hand-written and 300 generated cases: no legitimate manner statement is rejected.
+- **Form I-213 field map**: every report maps the facts found to the I-213 boxes they fill ("Country of Citizenship", "Date, Place, Time, and Manner of Last Entry", "Status at Entry", "Immigration Record", "Charge Code Word(s)"), labels taken from a public redacted I-213 (Rev. 08/01/07). Informational only; it does not change any result.
+- **Claude backup model** (`pipeline/llm_client.py`): used only if the Unissant-hosted model fails and `ANTHROPIC_API_KEY` is set. `LLM_FORCE_BACKUP=1` forces it for testing.
+
+Still not built: Form I-44 checks (we could not confirm its fields), separate case-fact inputs, and a check for two different subject names.
 
 ### Load test (Oct 28)
 

@@ -1,6 +1,7 @@
 {
-  "_about": "A claim of this fact type is kept only if its quote matches the pattern (case-insensitive). This stops the model from citing a sentence that does not actually state the fact, e.g. 'He re-entered the US' as admission status.",
+  "_about": "A claim of this fact type is kept only if its quote matches the pattern (case-insensitive). This stops the model from citing a sentence that does not actually state the fact, e.g. 'He re-entered the US' as admission status. A manner-of-entry quote must say how the subject entered; 'not inspected, admitted or paroled' alone is admission status, not manner.",
   "admitted_or_paroled_status": "admit|parol|inspect|\\bewi\\b",
   "admitted_status_at_reentry": "admit|parol|inspect|\\bewi\\b",
-  "prior_removal_date": "\\d|\\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)"
+  "prior_removal_date": "\\d|\\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)",
+  "manner_of_entry": "wad|swim|swam|on foot|\\bfoot\\b|walk|climb|jump|fence|wall|vehicle|\\bcar\\b|truck|drove|driv|boat|raft|vessel|float|tunnel|smuggl|conceal|\\bhid|airport|\\bair\\b|flight|port of entry|\\bpoe|ports|not designated|outside|between|brush|river|rio grande|desert|mountain|\\bewi\\b|without inspection|uninspected|\\b(?:enter|entr|cross|wad|swim|swam|walk|climb|jump|ran|run|drove|driv|arriv|came|return|re-?enter|smuggl).*(?:inspect|\\bewi\\b)|(?:inspect|\\bewi\\b).*\\b(?:enter|entr|cross|wad|swim|swam|walk|climb|jump|ran|run|drove|driv|arriv|came|return|re-?enter|smuggl)"
 }

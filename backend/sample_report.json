@@ -11,6 +11,78 @@
     "S4": "INADMISSIBILITY: Subject is inadmissible under Section 212(A) (9) (A) (I) of the Immigration and Nationality Act, as amended, in that he was previously ordered removed and entered or attempted to enter without being admitted.",
     "S5": "REMOVABILITY: Subject is removable under Section 212 because he was found inadmissible as an arriving alien in proceedings under section 235(b)l of the Act."
   },
+  "i213": [
+    {
+      "block": "Family Name / First / Middle",
+      "stated": [
+        "subject_identity"
+      ],
+      "not_stated": [],
+      "sentence_ids": [
+        "S1"
+      ]
+    },
+    {
+      "block": "Country of Citizenship",
+      "stated": [
+        "country_of_citizenship"
+      ],
+      "not_stated": [],
+      "sentence_ids": [
+        "S1"
+      ]
+    },
+    {
+      "block": "Date, Place, Time, and Manner of Last Entry",
+      "stated": [
+        "manner_of_entry",
+        "reentry_or_attempted_reentry"
+      ],
+      "not_stated": [
+        "place_of_entry"
+      ],
+      "sentence_ids": [
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "block": "Status at Entry",
+      "stated": [
+        "admitted_or_paroled_status",
+        "admitted_status_at_reentry"
+      ],
+      "not_stated": [],
+      "sentence_ids": [
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "block": "Immigration Record",
+      "stated": [
+        "prior_removal_order"
+      ],
+      "not_stated": [
+        "prior_removal_date"
+      ],
+      "sentence_ids": [
+        "S4"
+      ]
+    },
+    {
+      "block": "Charge Code Word(s)",
+      "stated": [
+        "212(a)(6)(A)(i)",
+        "212(a)(9)(A)(i)"
+      ],
+      "not_stated": [],
+      "sentence_ids": [
+        "S3",
+        "S4"
+      ]
+    }
+  ],
   "seconds": 0.0,
   "human_review": true,
   "multiple_charges": [
@@ -59,7 +131,7 @@
       "reason": null,
       "citation_check": {
         "result": "incomplete",
-        "reason": "1 of 5 facts that 212(a)(6)(A)(i) requires are not stated: where the subject entered (an approximate location such as \"near Brownsville, TX\" is enough)."
+        "reason": "1 of 5 facts that 212(a)(6)(A)(i) requires is not stated: where the subject entered (an approximate location such as \"near Brownsville, TX\" is enough)."
       },
       "facts": [
         {
@@ -133,7 +205,7 @@
       "reason": null,
       "citation_check": {
         "result": "incomplete",
-        "reason": "1 of 5 facts that 212(a)(9)(A)(i) requires are not stated: the date of the prior removal order or removal."
+        "reason": "1 of 5 facts that 212(a)(9)(A)(i) requires is not stated: the date of the prior removal order or removal."
       },
       "facts": [
         {

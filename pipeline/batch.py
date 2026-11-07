@@ -65,6 +65,7 @@ def page(rid, rep):
 <h1>Gap report: {e(rid)}</h1><div class="meta">{time.strftime('%Y-%m-%d %H:%M')} · model {e(rep['model'])} · prompt {e(rep['prompt_version'])} · {rep['seconds']}s</div>
 <div class="banner" style="background:{color}">{label}{' · send to a person' if overall == 'human_review' else ''}</div>
 <h2>Citation check</h2><table><tr><th style="width:24%">Charge cited</th><th style="width:18%">Result</th><th>Reason</th></tr>{checks}</table>
+<h2>Form I-213 fields</h2><table>{''.join(f"<tr><td style='width:38%'>{e(r['block'])}</td><td>{'Stated' if not r['not_stated'] else 'Not stated: ' + e(', '.join(x.replace('_', ' ') for x in r['not_stated']))}</td><td style='width:14%'>{e(', '.join(r['sentence_ids']))}</td></tr>" for r in rep.get('i213', []))}</table>
 <h2>Flags</h2><ol>{flags}</ol>
 <h2>Narrative</h2><div class="n">{narr}</div><div class="meta" style="margin-top:4px">Highlighted text is the exact quote behind each fact found. [S#] points to a sentence.</div>
 <div class="foot">{e(rep['disclaimer'])}</div></body></html>"""

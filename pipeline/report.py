@@ -4,10 +4,16 @@ from concurrent.futures import ThreadPoolExecutor
 from extract import extract, split_sentences, VERSION, ROOT
 from run_sample import gap_report, with_derived, TABLE
 from review import review
+from consistency import check as consistency_check
 
 # hard limit per review: the client timeout covers each network wait, not the whole call
 DEADLINE, POOL = float(os.environ.get("REVIEW_DEADLINE", 50)), ThreadPoolExecutor(8)
 DISCLAIMER = "Flags missing or conflicting documentation only. It does not judge the case or suggest charges. A person reviews every result."
+# Form I-213 boxes (labels as printed on Form I-213, Rev. 08/01/07) and the facts that fill them
+I213 = [("Family Name / First / Middle", ["subject_identity"]), ("Country of Citizenship", ["country_of_citizenship"]),
+        ("Date, Place, Time, and Manner of Last Entry", ["place_of_entry", "manner_of_entry", "reentry_or_attempted_reentry"]),
+        ("Status at Entry", ["admitted_or_paroled_status", "admitted_status_at_reentry"]), ("Immigration Record", ["prior_removal_order", "prior_removal_date"]),
+        ("Narrative: elements which establish the violation", ["misrepresentation_or_fraud_act", "material_fact_misrepresented", "benefit_or_admission_sought"])]
 PLAIN = {k: v for k, v in json.loads((ROOT / "checks/elements/fact_plain.json").read_text()).items() if not k.startswith("_")}
 
 def build_report(text, votes=1, chat=None):
@@ -62,7 +68,12 @@ def build_report(text, votes=1, chat=None):
             "citation_check": {"result": check[0], "reason": check[1]},
             "facts": [dict(fact_type=f, label=f.replace("_", " "), found=f not in bad, derived=bool(f in by and by[f].get("derived")), **(ev(f) if f not in bad else ev(None))) for f in row.get("required_facts", [])],
             "missing": miss, "conflicts": [dict(fact_type=f, **ev(f)) for f in conf], "disagreed": dis})
+    flags += consistency_check(out["sentences"], with_derived(claims))
     if multi:
         flag("multiple_charges", None, None, f"The narrative cites {len(multi['charges'])} charges ({', '.join(multi['charges'])}). Multi-charge cases go to a person; each charge is still checked below.", sorted({i for c in charges for i in c["cited_in"]}))
-    return dict(out, seconds=round(time.time() - t, 1), human_review=bool(multi) or any(c["status"] == "human_review" for c in charges),
+    need = {f for c in charges for f in TABLE.get(c["citation"] or "", {}).get("required_facts", [])}
+    i213 = [{"block": b, "stated": [f for f in fs if f in by and f in need], "not_stated": [f for f in fs if f in need and f not in by],
+             "sentence_ids": sorted({i for f in fs if f in by and f in need for i in by[f]["sentence_ids"]})} for b, fs in I213 if need & set(fs)]
+    i213.append({"block": "Charge Code Word(s)", "stated": [c["citation"] for c in charges if c["citation"]], "not_stated": [] if any(c["citation"] for c in charges) else ["charge"], "sentence_ids": sorted({i for c in charges for i in c["cited_in"]})})
+    return dict(out, i213=i213, seconds=round(time.time() - t, 1), human_review=bool(multi) or any(f["type"] == "inconsistency" for f in flags) or any(c["status"] == "human_review" for c in charges),
                 multiple_charges=multi and multi["charges"], flags=flags, charges=charges)
