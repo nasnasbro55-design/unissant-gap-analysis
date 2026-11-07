@@ -185,6 +185,8 @@ Added Nov 6–7 (night before the showcase):
 - **Form I-213 field map**: every report maps the facts found to the I-213 boxes they fill ("Country of Citizenship", "Date, Place, Time, and Manner of Last Entry", "Status at Entry", "Immigration Record", "Charge Code Word(s)"), labels taken from a public redacted I-213 (Rev. 08/01/07). Informational only; it does not change any result.
 - **Claude backup model** (`pipeline/llm_client.py`): used only if the Unissant-hosted model fails and `ANTHROPIC_API_KEY` is set. `LLM_FORCE_BACKUP=1` forces it for testing.
 
+**Final run before the showcase (Nov 7, 12:50am, all 63 hand-written cases):** 59/63 passed, recall 28/29 (97%), false flags 4 of 32 (12%), routing 21/21, slowest review 13.6s. These cases shaped the fixes, so this is a development number; the blind scores are round 1 (12/15) and round 2 (22/27). Remaining misses: c07 (dense fraud sentence), h06 and h10 (label judgment calls), and hc07, which passed 2 of 3 runs.
+
 Still not built: Form I-44 checks (we could not confirm its fields), separate case-fact inputs, and a check for two different subject names.
 
 ### Load test (Oct 28)
