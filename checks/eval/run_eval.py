@@ -30,9 +30,13 @@ def score(c, r):
         if a.get("status") != e["status"] or (e["missing"] is not None and want != got):
             ok = False
             why.append(f"{k}: expected {e['status']} missing {sorted(want)}, got {a.get('status')} missing {sorted(got)}")
-    if set(r.get("report", {})) - set(c["expected"]):
+    extra = set(r.get("report", {})) - set(c["expected"]) - {"multiple_charges_cited"}
+    if extra:
         ok = False
-        why.append(f"unexpected charges flagged: {sorted(set(r['report']) - set(c['expected']))}")
+        why.append(f"unexpected charges flagged: {sorted(extra)}")
+    if len(set(c["expected"]) - {"no_charge_cited"}) > 1 and "multiple_charges_cited" not in r.get("report", {}):
+        ok = False
+        why.append("multi-charge case was not sent to human review")
     return tp, fn, fp, ok, why
 
 if __name__ == "__main__":
@@ -79,8 +83,9 @@ if __name__ == "__main__":
         by_author.setdefault(c["author"], []).append(ok)
         if not is_amb and not ab:
             tp, fn, fp = tp + ctp, fn + cfn, fp + cfp
-        if any(e["status"] == "human_review" for e in c["expected"].values()):
-            route.append(all(r.get("report", {}).get(k, {}).get("status") == "human_review" for k, e in c["expected"].items() if e["status"] == "human_review"))
+        if any(e["status"] == "human_review" for e in c["expected"].values()) or len(set(c["expected"]) - {"no_charge_cited"}) > 1:
+            route.append(all(r.get("report", {}).get(k, {}).get("status") == "human_review" for k, e in c["expected"].items() if e["status"] == "human_review")
+                         and (len(set(c["expected"]) - {"no_charge_cited"}) < 2 or "multiple_charges_cited" in r.get("report", {})))
     secs = [r["secs"] for r in results]
     print(f"\nsettings: PROMPT_VERSION={os.environ.get('PROMPT_VERSION', 'v5')} REASONING_EFFORT={os.environ.get('REASONING_EFFORT', 'low')} workers={a.workers} repeat={a.repeat} votes={a.votes}")
     print(f"cases passed (headline): {head.count('pass')}/{len(head)}   sent to human because runs disagreed: {head.count('abst')}   wrong: {head.count('fail')}   ambiguous cases passed: {amb.count('pass')}/{len(amb)}")

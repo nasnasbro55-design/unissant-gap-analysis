@@ -164,6 +164,31 @@ What the blind run exposed, and the fix for each (all general rules, not edits t
 
 The sample narrative from Unissant gives the expected gaps (place of entry for 212(a)(6)(A)(i), prior removal date for 212(a)(9)(A)(i)) on every run.
 
+### Blind test, round 2 (Huy's 27 cases, Nov 5)
+
+First run, no changes made after seeing the cases: **22 of 27 passed**. His 10 cases written in the style of real CBP I-213 narratives: **10/10**. His other 17: 12/17. Across all 63 hand-written cases in that run: recall 27/29 (93%, goal 90%), false flags 6 of 33 (18%, goal at most 10%), routing 20/20, slowest review 16.8s.
+
+Main cause of the false flags: in a reentry charge, one phrase ("re-entered ... without being admitted") states admission status at reentry, but the model records it only as general admission status (h02, h05, c11). Fix (code rule): an admission phrase in the same sentence as the reentry also counts as admission status at reentry. Labeling judgment calls left as they are: h10 ("returned via an enforcement flight" as a removal order), h11 ("not inspected, admitted or paroled" as manner of entry).
+
+### Built after round 2, from Unissant's brief (Nov 5)
+
+A line-by-line check of the brief found requirements we had not covered. Added:
+- **Multi-charge cases go to a person** (a stated 100% target). Each charge is still checked.
+- **Title 8 U.S. Code citations**: 8 U.S.C. 1182(a)(...) maps to the INA 212(a) ground; 1325, 1326, INA 237(a), 275 and 276 are recognized and sent to a person as not covered, instead of "no charge cited".
+- **A plain-language reason on every flag**, and every flag points to a sentence (missing facts point to the sentence that cites the charge).
+- **A separate citation check per charge**: supported, incomplete, likely mismatch, needs review, or not in reference table.
+- **Batch mode with one-page reports** (`pipeline/batch.py`): the test bed asks for a one-page gap report for each of 25 to 50 narratives.
+
+Added Nov 6–7 (night before the showcase):
+- **Internal consistency checks** in code (`pipeline/consistency.py`): impossible dates, future dates, a prior removal dated after the reentry, and two different countries of citizenship. Each is a flag with a reason and sentence, and the case goes to a person. None of the 63 test cases or the Unissant sample triggers a false one.
+- **Manner-of-entry rule**: a manner quote must say how the subject entered. "Not inspected, admitted or paroled" alone is admission status, not manner (behind h11, hc06, j05). Checked against all 63 hand-written and 300 generated cases: no legitimate manner statement is rejected.
+- **Form I-213 field map**: every report maps the facts found to the I-213 boxes they fill ("Country of Citizenship", "Date, Place, Time, and Manner of Last Entry", "Status at Entry", "Immigration Record", "Charge Code Word(s)"), labels taken from a public redacted I-213 (Rev. 08/01/07). Informational only; it does not change any result.
+- **Claude backup model** (`pipeline/llm_client.py`): used only if the Unissant-hosted model fails and `ANTHROPIC_API_KEY` is set. `LLM_FORCE_BACKUP=1` forces it for testing.
+
+**Final run before the showcase (Nov 7, 12:50am, all 63 hand-written cases):** 59/63 passed, recall 28/29 (97%), false flags 4 of 32 (12%), routing 21/21, slowest review 13.6s. These cases shaped the fixes, so this is a development number; the blind scores are round 1 (12/15) and round 2 (22/27). Remaining misses: c07 (dense fraud sentence), h06 and h10 (label judgment calls), and hc07, which passed 2 of 3 runs.
+
+Still not built: Form I-44 checks (we could not confirm its fields), separate case-fact inputs, and a check for two different subject names.
+
 ### Load test (Oct 28)
 
 `checks/load_test.py` against the `/review` API, 10 reviews per level, on the shared Unissant server:
@@ -221,7 +246,9 @@ On all 36 hand-written cases: 34/36 passed, recall 16/16 (100%), false flags 2 o
 - [x] Unissant answers: any model allowed (no effect on scoring); approximate location counts as place of entry.
 - [x] Jake's blind cases: first run 12/15, fixes made (see Blind test, round 1).
 - [ ] Huy's blind cases (`cases_huy.jsonl`) and React UI (`ui/`) pushed to main.
-- [ ] First run on Huy's cases as the round 2 blind test, with no changes in between.
+- [x] First run on Huy's cases (round 2): 22/27, CBP-style 10/10.
+- [ ] Ask Unissant for the test set, answer key and charge reference sheet (sent Nov 5).
+- [ ] Internal consistency checks (dates out of order, conflicting values).
 - [ ] Write test cases in the style of the public redacted CBP I-213 narratives Unissant shared, with fictional names and places.
 
 ### Pipeline

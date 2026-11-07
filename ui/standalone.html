@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gap Analysis Review Screen | Standalone Demo & Live Review</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- React and Babel from CDN for standalone zero-install demo -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --bg-app: #f8fafc;
+      --bg-card: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --color-complete: #059669;
+      --bg-complete: #ecfdf5;
+      --border-complete: #a7f3d0;
+      --color-gap: #b45309;
+      --bg-gap: #fffbeb;
+      --border-gap: #fde68a;
+      --color-review: #6d28d9;
+      --bg-review: #f5f3ff;
+      --border-review: #ddd6fe;
+      --bg-quote-active: #fef08a;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --radius: 8px;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font-sans); background: var(--bg-app); color: var(--text-main); line-height: 1.5; }
+    .font-mono { font-family: var(--font-mono); }
+    .app-container { display: flex; flex-direction: column; min-height: 100vh; }
+    .app-header { background: #0f172a; color: #fff; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #1e293b; }
+    .header-brand { display: flex; align-items: center; gap: 1rem; }
+    .brand-logo { background: #2563eb; padding: 0.5rem; border-radius: var(--radius); display: flex; align-items: center; justify-content: center; }
+    .brand-title { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; }
+    .brand-subtitle { font-size: 0.8125rem; color: #94a3b8; }
+    .header-controls { display: flex; align-items: center; gap: 1rem; }
+    .select-preset { background: #1e293b; color: #fff; border: 1px solid #334155; border-radius: 6px; padding: 0.5rem 0.875rem; font-size: 0.875rem; cursor: pointer; }
+    .btn-live-toggle { background: #2563eb; color: #fff; border: none; padding: 0.5rem 0.875rem; border-radius: 6px; font-weight: 600; font-size: 0.875rem; cursor: pointer; }
+    .disclaimer-banner { background: #eff6ff; border-bottom: 1px solid #bfdbfe; padding: 0.75rem 2rem; display: flex; align-items: center; gap: 0.75rem; font-size: 0.875rem; color: #1e40af; }
+    .disclaimer-tag { background: #dbeafe; color: #1e3a8a; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; padding: 0.25rem 0.625rem; border-radius: 9999px; border: 1px solid #bfdbfe; }
+    .metrics-bar { background: #fff; border-bottom: 1px solid var(--border); padding: 0.625rem 2rem; display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
+    .metric-chip { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8125rem; }
+    .metric-label { color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; font-weight: 500; }
+    .metric-value { font-weight: 600; color: var(--text-main); background: #f1f5f9; padding: 0.15rem 0.5rem; border-radius: 4px; }
+    .text-amber { color: #b45309; background: #fef3c7; }
+    .text-green { color: #047857; background: #d1fae5; }
+    .text-purple { color: #6d28d9; background: #ede9fe; }
+    
+    /* Live editor */
+    .live-editor-box { background: #fff; border-bottom: 2px solid #2563eb; padding: 1.25rem 2rem; box-shadow: var(--shadow-md); }
+    .live-editor-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+    .live-textarea { width: 100%; padding: 0.75rem; border: 1px solid var(--border-strong); border-radius: 6px; font-size: 0.875rem; line-height: 1.5; font-family: var(--font-sans); }
+    .live-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; }
+    .btn-submit-live { background: #2563eb; color: #fff; border: none; padding: 0.5rem 1.25rem; border-radius: 6px; font-weight: 700; cursor: pointer; }
+    .loading-alert { background: #eff6ff; border-bottom: 2px solid #3b82f6; padding: 0.75rem 2rem; color: #1e40af; font-size: 0.875rem; display: flex; align-items: center; gap: 0.75rem; }
+    .error-alert { background: #fef2f2; border-bottom: 1px solid #fecaca; padding: 0.75rem 2rem; color: #991b1b; font-size: 0.875rem; }
+
+    .main-content { display: grid; grid-template-columns: 1fr 1.25fr; gap: 1.5rem; padding: 1.5rem 2rem; flex: 1; max-width: 1600px; margin: 0 auto; width: 100%; }
+    @media (max-width: 1024px) { .main-content { grid-template-columns: 1fr; } }
+    .narrative-viewer-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; }
+    .card-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .badge-subtle { font-size: 0.75rem; color: var(--text-muted); background: #f1f5f9; padding: 0.2rem 0.5rem; border-radius: 4px; }
+    .narrative-body { padding: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem; }
+    .narrative-sentence-row { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.5rem 0.75rem; border-radius: 6px; cursor: pointer; border: 1px solid transparent; transition: all 0.15s; }
+    .narrative-sentence-row:hover { background: #f8fafc; border-color: #cbd5e1; }
+    .narrative-sentence-row.sentence-active { background: #eff6ff; border-color: #93c5fd; }
+    .sentence-id-pill { font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; color: #475569; background: #e2e8f0; padding: 0.15rem 0.45rem; border-radius: 4px; }
+    .sentence-active .sentence-id-pill { background: #2563eb; color: #fff; }
+    .quote-highlight { background: var(--bg-quote-active); color: #713f12; padding: 0.1rem 0.25rem; border-radius: 3px; border-bottom: 2px solid #ca8a04; }
+    .narrative-footer { padding: 0.75rem 1.25rem; background: #f8fafc; border-top: 1px solid var(--border); display: flex; gap: 1.5rem; font-size: 0.75rem; color: var(--text-muted); }
+    .charges-header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+    .charges-list { display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem; }
+    .charge-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-sm); overflow: hidden; }
+    .charge-complete { border-left: 4px solid var(--color-complete); }
+    .charge-gaps { border-left: 4px solid #f59e0b; }
+    .charge-human_review { border-left: 4px solid var(--color-review); }
+    .charge-card-header { padding: 1rem 1.25rem; display: flex; justify-content: space-between; align-items: flex-start; cursor: pointer; }
+    .citation-pill { font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; color: #1e3a8a; background: #dbeafe; padding: 0.15rem 0.5rem; border-radius: 4px; display: inline-block; }
+    .charge-name { font-size: 1rem; font-weight: 600; }
+    .statute-source { font-size: 0.75rem; color: var(--text-muted); }
+    .status-badge { font-size: 0.8125rem; font-weight: 600; padding: 0.25rem 0.625rem; border-radius: 6px; }
+    .status-complete { background: var(--bg-complete); color: var(--color-complete); border: 1px solid var(--border-complete); }
+    .status-gaps { background: var(--bg-gap); color: var(--color-gap); border: 1px solid var(--border-gap); }
+    .status-review { background: var(--bg-review); color: var(--color-review); border: 1px solid var(--border-review); }
+    .charge-card-content { padding: 1.25rem; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 1.25rem; }
+    .reason-alert { background: var(--bg-review); border: 1px solid var(--border-review); border-radius: 6px; padding: 0.75rem 1rem; font-size: 0.875rem; color: var(--color-review); }
+    .conflicts-alert { background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 0.75rem 1rem; font-size: 0.875rem; color: #991b1b; }
+    .missing-facts-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.35rem; }
+    .missing-fact-pill { background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; border-radius: 6px; padding: 0.35rem 0.75rem; font-size: 0.8125rem; font-weight: 600; }
+    .found-facts-list { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.35rem; }
+    .found-fact-row { border: 1px solid var(--border); border-radius: 6px; padding: 0.625rem 0.875rem; background: #f8fafc; cursor: pointer; transition: all 0.15s; }
+    .found-fact-row:hover, .found-fact-row.fact-active { background: #eff6ff; border-color: #3b82f6; }
+    .fact-row-header { display: flex; justify-content: space-between; align-items: center; }
+    .fact-name { font-size: 0.875rem; font-weight: 600; text-transform: capitalize; }
+    .sentence-tag { font-family: var(--font-mono); font-size: 0.7rem; font-weight: 700; background: #e2e8f0; color: #334155; padding: 0.1rem 0.35rem; border-radius: 4px; margin-left: 0.3rem; }
+    .conf-high { background: #d1fae5; color: #065f46; font-size: 0.7rem; font-weight: 600; padding: 0.1rem 0.4rem; border-radius: 4px; }
+    .fact-quote-box { margin-top: 0.375rem; font-size: 0.8125rem; color: #334155; background: #fff; padding: 0.35rem 0.625rem; border-radius: 4px; border-left: 3px solid #3b82f6; font-style: italic; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    const PRESETS = [
+      {
+        id: 'sample_unissant',
+        title: "Unissant Sample Case (Gaps)",
+        data: {
+          "version": "1", "model": "gpt-oss-20b", "prompt_version": "v4", "votes": 1, "seconds": 5.4,
+          "disclaimer": "Flags missing documentation only. It does not judge the case or suggest charges. A person reviews every result.",
+          "sentences": {
+            "S1": "INADMISSIBILITY: 'John Doe' a citizen of Mexico.",
+            "S2": "He has never had any documents that would allow him to be, or remain, in the United States legally.",
+            "S3": "'John Doe' is inadmissible under section 212(a) (6) (A) (i) of the INA, in that he entered the United States at a place not designated by the Attorney General and was not then admitted or paroled after inspection by an immigration officer.",
+            "S4": "INADMISSIBILITY: Subject is inadmissible under Section 212(A) (9) (A) (I) of the Immigration and Nationality Act, as amended, in that he was previously ordered removed and entered or attempted to enter without being admitted.",
+            "S5": "REMOVABILITY: Subject is removable under Section 212 because he was found inadmissible as an arriving alien in proceedings under section 235(b)l of the Act."
+          },
+          "charges": [
+            {
+              "citation": "212(a)(6)(A)(i)", "name": "Present without admission or parole", "source": "INA 212(a)(6)(A)(i); USCIS Policy Manual Vol. 7, Part L, Ch. 3",
+              "status": "gaps", "reason": null,
+              "facts": [
+                { "fact_type": "subject_identity", "label": "subject identity", "found": true, "quote": "John Doe", "sentence_ids": ["S1"], "confidence": "high" },
+                { "fact_type": "country_of_citizenship", "label": "country of citizenship", "found": true, "quote": "a citizen of Mexico", "sentence_ids": ["S1"], "confidence": "high" },
+                { "fact_type": "manner_of_entry", "label": "manner of entry", "found": true, "quote": "entered the United States at a place not designated by the Attorney General", "sentence_ids": ["S3"], "confidence": "high" },
+                { "fact_type": "place_of_entry", "label": "place of entry", "found": false, "quote": null, "sentence_ids": [], "confidence": null },
+                { "fact_type": "admitted_or_paroled_status", "label": "admitted or paroled status", "found": true, "quote": "was not then admitted or paroled", "sentence_ids": ["S3"], "confidence": "high" }
+              ],
+              "missing": ["place_of_entry"], "conflicts": [], "disagreed": []
+            },
+            {
+              "citation": "212(a)(9)(A)(i)", "name": "Prior removal, reentry without admission", "source": "INA 212(a)(9)(A)(i); USCIS Policy Manual Vol. 7, Part L, Ch. 3",
+              "status": "gaps", "reason": null,
+              "facts": [
+                { "fact_type": "subject_identity", "label": "subject identity", "found": true, "quote": "John Doe", "sentence_ids": ["S1"], "confidence": "high" },
+                { "fact_type": "prior_removal_order", "label": "prior removal order", "found": true, "quote": "previously ordered removed", "sentence_ids": ["S4"], "confidence": "high" },
+                { "fact_type": "prior_removal_date", "label": "prior removal date", "found": false, "quote": null, "sentence_ids": [], "confidence": null },
+                { "fact_type": "reentry_or_attempted_reentry", "label": "reentry or attempted reentry", "found": true, "quote": "entered or attempted to enter", "sentence_ids": ["S4"], "confidence": "high" },
+                { "fact_type": "admitted_status_at_reentry", "label": "admitted status at reentry", "found": true, "quote": "without being admitted", "sentence_ids": ["S4"], "confidence": "high" }
+              ],
+              "missing": ["prior_removal_date"], "conflicts": [], "disagreed": []
+            }
+          ]
+        }
+      },
+      {
+        id: 'clean_case',
+        title: "Clean Documentation Case (Complete)",
+        data: {
+          "version": "1", "model": "gpt-oss-20b", "prompt_version": "v4", "votes": 1, "seconds": 4.8,
+          "disclaimer": "Flags missing documentation only. It does not judge the case or suggest charges. A person reviews every result.",
+          "sentences": {
+            "S1": "Subject JAVIER ENRIQUE MONTIEL-CASTRO is a native and citizen of Nicaragua.",
+            "S2": "On 04/12/2025 at approximately 2130 hrs, Border Patrol agents encountered the subject approximately two miles east of Del Rio, Texas.",
+            "S3": "Subject stated under oath that he entered the United States by swimming across the Rio Grande river and that he was not inspected, admitted, or paroled by an immigration officer.",
+            "S4": "Subject is inadmissible under INA 212(a)(6)(A)(i)."
+          },
+          "charges": [
+            {
+              "citation": "212(a)(6)(A)(i)", "name": "Present without admission or parole", "source": "INA 212(a)(6)(A)(i); USCIS Policy Manual Vol. 7, Part L, Ch. 3",
+              "status": "complete", "reason": null,
+              "facts": [
+                { "fact_type": "subject_identity", "label": "subject identity", "found": true, "quote": "JAVIER ENRIQUE MONTIEL-CASTRO", "sentence_ids": ["S1"], "confidence": "high" },
+                { "fact_type": "country_of_citizenship", "label": "country of citizenship", "found": true, "quote": "citizen of Nicaragua", "sentence_ids": ["S1"], "confidence": "high" },
+                { "fact_type": "manner_of_entry", "label": "manner of entry", "found": true, "quote": "swimming across the Rio Grande river", "sentence_ids": ["S3"], "confidence": "high" },
+                { "fact_type": "place_of_entry", "label": "place of entry", "found": true, "quote": "approximately two miles east of Del Rio, Texas", "sentence_ids": ["S2"], "confidence": "high" },
+                { "fact_type": "admitted_or_paroled_status", "label": "admitted or paroled status", "found": true, "quote": "not inspected, admitted, or paroled by an immigration officer", "sentence_ids": ["S3"], "confidence": "high" }
+              ],
+              "missing": [], "conflicts": [], "disagreed": []
+            }
+          ]
+        }
+      },
+      {
+        id: 'contradiction_case',
+        title: "Contradiction Case (Routes to Human Review)",
+        data: {
+          "version": "1", "model": "gpt-oss-20b", "prompt_version": "v4", "votes": 1, "seconds": 5.1,
+          "disclaimer": "Flags missing documentation only. It does not judge the case or suggest charges. A person reviews every result.",
+          "sentences": {
+            "S1": "SUBJECT GUILLERMO HERNANDEZ-RUIZ is a citizen of Mexico.",
+            "S2": "On 01/20/2025, the subject arrived at the Otay Mesa Port of Entry and was formally inspected and admitted by a CBP officer as a B-2 temporary visitor with an authorized stay through 07/19/2025.",
+            "S3": "Subject remained in the US past that date without extension.",
+            "S4": "Subject is charged as inadmissible under INA 212(a)(6)(A)(i) as an alien present without admission or parole."
+          },
+          "charges": [
+            {
+              "citation": "212(a)(6)(A)(i)", "name": "Present without admission or parole", "source": "INA 212(a)(6)(A)(i); USCIS Policy Manual Vol. 7, Part L, Ch. 3",
+              "status": "human_review", "reason": "the narrative states facts that conflict with this charge",
+              "facts": [
+                { "fact_type": "subject_identity", "label": "subject identity", "found": true, "quote": "GUILLERMO HERNANDEZ-RUIZ", "sentence_ids": ["S1"], "confidence": "high" },
+                { "fact_type": "country_of_citizenship", "label": "country of citizenship", "found": true, "quote": "citizen of Mexico", "sentence_ids": ["S1"], "confidence": "high" },
+                { "fact_type": "admitted_or_paroled_status", "label": "admitted or paroled status", "found": true, "quote": "formally inspected and admitted by a CBP officer as a B-2 temporary visitor", "sentence_ids": ["S2"], "confidence": "high" }
+              ],
+              "missing": ["manner_of_entry", "place_of_entry"],
+              "conflicts": [{ "fact_type": "stated_lawful_admission", "quote": "formally inspected and admitted by a CBP officer as a B-2 temporary visitor", "sentence_ids": ["S2"], "confidence": "high" }],
+              "disagreed": []
+            }
+          ]
+        }
+      },
+      {
+        id: 'unknown_charge_case',
+        title: "Uncovered Charge Case (Routes to Human Review)",
+        data: {
+          "version": "1", "model": "gpt-oss-20b", "prompt_version": "v4", "votes": 1, "seconds": 3.2,
+          "disclaimer": "Flags missing documentation only. It does not judge the case or suggest charges. A person reviews every result.",
+          "sentences": {
+            "S1": "Subject MARCOS ANDRADE-SILVA, a citizen of Brazil, was convicted on 10/12/2024 in Harris County Criminal Court of felony theft.",
+            "S2": "Subject is inadmissible under INA 212(a)(2)(A)(i) as an alien convicted of a crime involving moral turpitude."
+          },
+          "charges": [
+            {
+              "citation": "212(a)(2)(A)(i)", "name": null, "source": null, "status": "human_review",
+              "reason": "charge not in reference table; officer must verify statutory elements manually",
+              "facts": [], "missing": [], "conflicts": [], "disagreed": []
+            }
+          ]
+        }
+      }
+    ];
+
+    function App() {
+      const [report, setReport] = useState(PRESETS[0].data);
+      const [selectedPresetId, setSelectedPresetId] = useState('sample_unissant');
+      const [showLive, setShowLive] = useState(false);
+      const [inputNarrative, setInputNarrative] = useState(Object.values(PRESETS[0].data.sentences).join(' '));
+      const [isLoading, setIsLoading] = useState(false);
+      const [elapsed, setElapsed] = useState(0);
+      const [apiError, setApiError] = useState(null);
+      const [activeSentenceIds, setActiveSentenceIds] = useState([]);
+      const [activeQuote, setActiveQuote] = useState('');
+
+      useEffect(() => {
+        let timer;
+        if (isLoading) {
+          setElapsed(0);
+          timer = setInterval(() => setElapsed(e => +(e + 0.1).toFixed(1)), 100);
+        }
+        return () => clearInterval(timer);
+      }, [isLoading]);
+
+      const handlePreset = (id) => {
+        setSelectedPresetId(id);
+        const p = PRESETS.find(x => x.id === id);
+        if (p) {
+          setReport(p.data);
+          setInputNarrative(Object.values(p.data.sentences).join(' '));
+          setApiError(null);
+        }
+      };
+
+      const runLiveReview = async () => {
+        if (!inputNarrative.trim()) return;
+        setIsLoading(true);
+        setApiError(null);
+        try {
+          const res = await fetch('http://localhost:8000/review', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ narrative: inputNarrative })
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+          const data = await res.json();
+          setReport(data);
+          setSelectedPresetId('live');
+          setShowLive(false);
+        } catch (e) {
+          setApiError(`Could not reach Ethan's live backend at http://localhost:8000/review (${e.message}). You can run: uvicorn backend.app:app --port 8000`);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      return (
+        <div className="app-container">
+          <header className="app-header">
+            <div className="header-brand">
+              <div className="brand-logo">⚖️</div>
+              <div>
+                <h1 className="brand-title">CBP Investigative Narrative Gap Analysis</h1>
+                <p className="brand-subtitle">Challenge+X · Unissant UC3 · Team TNUX</p>
+              </div>
+            </div>
+            <div className="header-controls">
+              <select className="select-preset" value={selectedPresetId} onChange={e => handlePreset(e.target.value)}>
+                {PRESETS.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}
+                {selectedPresetId === 'live' && <option value="live">Live Review Result</option>}
+              </select>
+              <button className="btn-live-toggle" onClick={() => setShowLive(!showLive)}>
+                {showLive ? 'Close Live Review' : 'Live Review (POST /review)'}
+              </button>
+            </div>
+          </header>
+
+          <div className="disclaimer-banner">
+            <div>ℹ️</div>
+            <div style={{ flex: 1 }}>
+              <strong>Official Review Guardrail: </strong> {report.disclaimer}
+            </div>
+            <div className="disclaimer-tag">Human-in-the-Loop</div>
+          </div>
+
+          {showLive && (
+            <div className="live-editor-box">
+              <div className="live-editor-header">
+                <strong>Live Narrative Input (POST http://localhost:8000/review)</strong>
+                <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Connected to Unissant hosted gpt-oss-20b</span>
+              </div>
+              <textarea
+                className="live-textarea"
+                rows={4}
+                value={inputNarrative}
+                onChange={e => setInputNarrative(e.target.value)}
+                placeholder="Paste or edit narrative here..."
+              />
+              <div className="live-actions">
+                <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Typical response latency: 5 to 15 seconds</span>
+                <button className="btn-submit-live" onClick={runLiveReview} disabled={isLoading}>
+                  {isLoading ? `Analyzing (${elapsed}s)...` : '⚡ Run Review (Live Model)'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {isLoading && (
+            <div className="loading-alert">
+              <span>⏳</span>
+              <div>
+                <strong>Running GenAI Fact Extraction & Gap Analysis...</strong> ({elapsed}s elapsed)
+                <div style={{ fontSize: '0.75rem' }}>Calling Ethan's endpoint at http://localhost:8000/review with gpt-oss-20b</div>
+              </div>
+            </div>
+          )}
+
+          {apiError && (
+            <div className="error-alert">
+              <strong>Notice: </strong> {apiError}
+            </div>
+          )}
+
+          <div className="metrics-bar">
+            <div className="metric-chip"><span className="metric-label">Model</span><span className="metric-value font-mono">{report.model || 'gpt-oss-20b'}</span></div>
+            <div className="metric-chip"><span className="metric-label">Latency</span><span className="metric-value font-mono">{report.seconds ? `${report.seconds}s` : '< 6s'}</span></div>
+            <div className="metric-chip"><span className="metric-label">Charges</span><span className="metric-value">{report.charges ? report.charges.length : 0}</span></div>
+            <div className="metric-chip"><span className="metric-label">Human Review</span><span className={`metric-value ${report.charges && report.charges.some(c => c.status === 'human_review') ? 'text-purple' : 'text-green'}`}>{report.charges && report.charges.some(c => c.status === 'human_review') ? 'Yes' : 'No'}</span></div>
+          </div>
+
+          <main className="main-content">
+            <section>
+              <div className="narrative-viewer-card">
+                <div className="card-header">
+                  <h3>Officer Narrative</h3>
+                  <span className="badge-subtle">{Object.keys(report.sentences || {}).length} Sentences</span>
+                </div>
+                <div className="narrative-body">
+                  {Object.entries(report.sentences || {}).map(([sId, text]) => {
+                    const isActive = activeSentenceIds.includes(sId);
+                    return (
+                      <div key={sId} className={`narrative-sentence-row ${isActive ? 'sentence-active' : ''}`}>
+                        <div className="sentence-id-pill">{sId}</div>
+                        <div>
+                          {isActive && activeQuote && text.includes(activeQuote) ? (
+                            <span>
+                              {text.substring(0, text.indexOf(activeQuote))}
+                              <mark className="quote-highlight">{activeQuote}</mark>
+                              {text.substring(text.indexOf(activeQuote) + activeQuote.length)}
+                            </span>
+                          ) : (
+                            <span>{text}</span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="narrative-footer">
+                  <span>Hover over any found fact on the right to highlight its sentence and grounded quote.</span>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <div className="charges-header">
+                <h3>Statutory Findings & Gaps</h3>
+              </div>
+              <div className="charges-list">
+                {(!report.charges || report.charges.length === 0) ? (
+                  <div style={{ background: '#fef2f2', padding: '1.5rem', borderRadius: '8px', color: '#991b1b' }}>
+                    <h4>No Citations Found in Narrative</h4>
+                    <p>Case routed to human review.</p>
+                  </div>
+                ) : (
+                  report.charges.map((charge, idx) => (
+                    <div key={idx} className={`charge-card charge-${charge.status}`}>
+                      <div className="charge-card-header">
+                        <div>
+                          <div className="citation-pill">INA § {charge.citation || 'Unspecified'}</div>
+                          <h4 className="charge-name">{charge.name || (charge.citation ? `Statute ${charge.citation}` : 'Unknown Charge')}</h4>
+                          <div className="statute-source">{charge.source}</div>
+                        </div>
+                        <span className={`status-badge status-${charge.status}`}>
+                          {charge.status === 'gaps' ? '⚠ Gaps Detected' : charge.status === 'complete' ? '✓ Complete' : '👁 Human Review'}
+                        </span>
+                      </div>
+
+                      <div className="charge-card-content">
+                        {charge.reason && (
+                          <div className="reason-alert">
+                            <strong>Human Review Trigger: </strong> {charge.reason}
+                          </div>
+                        )}
+
+                        {charge.conflicts && charge.conflicts.length > 0 && (
+                          <div className="conflicts-alert">
+                            <strong>Contradiction Detected: </strong> Stated facts conflict with this charge.
+                          </div>
+                        )}
+
+                        {charge.missing && charge.missing.length > 0 && (
+                          <div>
+                            <strong>Missing Statutory Facts ({charge.missing.length}):</strong>
+                            <div className="missing-facts-grid">
+                              {charge.missing.map((mf, i) => (
+                                <div key={i} className="missing-fact-pill">✕ {mf.replace(/_/g, ' ')}</div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        <div>
+                          <strong>Documented Evidence & Quotes:</strong>
+                          <div className="found-facts-list">
+                            {(charge.facts || []).filter(f => f.found).map((f, i) => (
+                              <div
+                                key={i}
+                                className="found-fact-row"
+                                onMouseEnter={() => { setActiveSentenceIds(f.sentence_ids); setActiveQuote(f.quote); }}
+                                onMouseLeave={() => { setActiveSentenceIds([]); setActiveQuote(''); }}
+                              >
+                                <div className="fact-row-header">
+                                  <span className="fact-name">{f.label || f.fact_type}</span>
+                                  <div>
+                                    {(f.sentence_ids || []).map(s => <span key={s} className="sentence-tag">{s}</span>)}
+                                    <span className="conf-high">{f.confidence}</span>
+                                  </div>
+                                </div>
+                                {f.quote && <div className="fact-quote-box">“{f.quote}”</div>}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </section>
+          </main>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

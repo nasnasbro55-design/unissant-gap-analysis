@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Slide 1: Clean Narrative (Complete Documentation)</title>
+  <link rel="stylesheet" href="../src/index.css">
+  <style>
+    body { background: #f8fafc; margin: 0; padding: 0; }
+    .slide-badge { background: #059669; color: white; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <div class="header-brand">
+        <div class="brand-logo">⚖️</div>
+        <div>
+          <h1 class="brand-title">CBP Investigative Narrative Gap Analysis</h1>
+          <p class="brand-subtitle">Challenge+X · Unissant UC3 · Team TNUX</p>
+        </div>
+      </div>
+      <div class="header-controls">
+        <span class="slide-badge">Slide Showcase: Clean Complete Case</span>
+      </div>
+    </header>
+
+    <div class="disclaimer-banner">
+      <div>ℹ️</div>
+      <div class="disclaimer-text">
+        <strong>Official Review Guardrail: </strong> Flags missing documentation only. It does not judge the case or suggest charges. A person reviews every result.
+      </div>
+      <div class="disclaimer-tag">Human-in-the-Loop</div>
+    </div>
+
+    <div class="metrics-bar">
+      <div class="metric-chip"><span class="metric-label">Model</span><span class="metric-value font-mono">gpt-oss-20b</span></div>
+      <div class="metric-chip"><span class="metric-label">Prompt</span><span class="metric-value font-mono">v5</span></div>
+      <div class="metric-chip"><span class="metric-label">Review Latency</span><span class="metric-value font-mono">4.8s</span></div>
+      <div class="metric-chip"><span class="metric-label">Charges Checked</span><span class="metric-value">1</span></div>
+      <div class="metric-chip"><span class="metric-label">Gaps Identified</span><span class="metric-value text-green">0 Gaps (Complete)</span></div>
+      <div class="metric-chip"><span class="metric-label">Status</span><span class="metric-value text-green">✓ Ready for Legal Record</span></div>
+    </div>
+
+    <main class="main-content">
+      <section class="column-narrative">
+        <div class="narrative-viewer-card">
+          <div class="card-header">
+            <div class="header-title"><h3>Officer Narrative</h3></div>
+            <span class="badge-subtle">4 Sentences</span>
+          </div>
+          <div class="narrative-body">
+            <div class="narrative-sentence-row">
+              <div class="sentence-id-pill">S1</div>
+              <div class="sentence-text">Subject JAVIER ENRIQUE MONTIEL-CASTRO is a native and citizen of Nicaragua.</div>
+            </div>
+            <div class="narrative-sentence-row sentence-active">
+              <div class="sentence-id-pill">S2</div>
+              <div class="sentence-text">On 04/12/2025 at approximately 2130 hrs, Border Patrol agents encountered the subject <mark class="quote-highlight">approximately two miles east of Del Rio, Texas</mark>.</div>
+            </div>
+            <div class="narrative-sentence-row sentence-active">
+              <div class="sentence-id-pill">S3</div>
+              <div class="sentence-text">Subject stated under oath that he entered the United States by <mark class="quote-highlight">swimming across the Rio Grande river</mark> and that he <mark class="quote-highlight">was not inspected, admitted, or paroled</mark> by an immigration officer.</div>
+            </div>
+            <div class="narrative-sentence-row">
+              <div class="sentence-id-pill">S4</div>
+              <div class="sentence-text">Subject is inadmissible under INA 212(a)(6)(A)(i).</div>
+            </div>
+          </div>
+          <div class="narrative-footer">
+            <span class="legend-item"><span class="legend-pill">S2</span> Linked Sentence</span>
+            <span class="legend-item"><mark class="legend-mark">Highlighted text</mark> Grounded Quote</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="column-charges">
+        <div class="charges-header">
+          <div class="charges-title-wrap">
+            <h3>Cited Charges & Statutory Findings</h3>
+            <p class="charges-subtitle">Deterministic rules check every required element against grounded quotes from the narrative.</p>
+          </div>
+          <div class="charges-status-summary">
+            <span class="status-pill status-complete">1 Complete</span>
+          </div>
+        </div>
+
+        <div class="charges-list">
+          <div class="charge-card charge-complete">
+            <div class="charge-card-header">
+              <div class="charge-title-section">
+                <div class="citation-pill">INA § 212(a)(6)(A)(i)</div>
+                <h4 class="charge-name">Present without admission or parole</h4>
+                <div class="statute-source">INA 212(a)(6)(A)(i); USCIS Policy Manual Vol. 7, Part L, Ch. 3</div>
+              </div>
+              <span class="status-badge status-complete">✓ Complete (All Facts Documented)</span>
+            </div>
+
+            <div class="charge-card-content">
+              <div class="section-block">
+                <div class="section-title"><span class="indicator-dot dot-found"></span><h5>Required Facts Documented (5 of 5)</h5></div>
+                <div class="found-facts-list">
+                  <div class="found-fact-row">
+                    <div class="fact-row-header"><span class="fact-name">Subject Identity</span><div><span class="sentence-tag">S1</span><span class="confidence-badge conf-high">HIGH CONF</span></div></div>
+                    <div class="fact-quote-box">“JAVIER ENRIQUE MONTIEL-CASTRO”</div>
+                  </div>
+                  <div class="found-fact-row">
+                    <div class="fact-row-header"><span class="fact-name">Country of Citizenship</span><div><span class="sentence-tag">S1</span><span class="confidence-badge conf-high">HIGH CONF</span></div></div>
+                    <div class="fact-quote-box">“citizen of Nicaragua”</div>
+                  </div>
+                  <div class="found-fact-row">
+                    <div class="fact-row-header"><span class="fact-name">Manner of Entry</span><div><span class="sentence-tag">S3</span><span class="confidence-badge conf-high">HIGH CONF</span></div></div>
+                    <div class="fact-quote-box">“swimming across the Rio Grande river”</div>
+                  </div>
+                  <div class="found-fact-row fact-active">
+                    <div class="fact-row-header"><span class="fact-name">Place of Entry</span><div><span class="sentence-tag">S2</span><span class="confidence-badge conf-high">HIGH CONF</span></div></div>
+                    <div class="fact-quote-box">“approximately two miles east of Del Rio, Texas”</div>
+                  </div>
+                  <div class="found-fact-row">
+                    <div class="fact-row-header"><span class="fact-name">Admitted or Paroled Status</span><div><span class="sentence-tag">S3</span><span class="confidence-badge conf-high">HIGH CONF</span></div></div>
+                    <div class="fact-quote-box">“not inspected, admitted, or paroled by an immigration officer”</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

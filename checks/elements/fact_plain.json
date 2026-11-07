@@ -1,0 +1,18 @@
+{
+  "_about": "Short plain-English phrase for each fact, used to write the reason on every flag.",
+  "subject_identity": "the subject's name or another identifier",
+  "country_of_citizenship": "the subject's country of citizenship",
+  "manner_of_entry": "how the subject entered (for example, on foot without inspection)",
+  "place_of_entry": "where the subject entered (an approximate location such as \"near Brownsville, TX\" is enough)",
+  "admitted_or_paroled_status": "whether the subject was admitted or paroled",
+  "prior_removal_order": "that the subject was previously ordered removed",
+  "prior_removal_date": "the date of the prior removal order or removal",
+  "reentry_or_attempted_reentry": "that the subject entered or tried to enter again after the removal",
+  "admitted_status_at_reentry": "whether the subject was admitted when they came back",
+  "misrepresentation_or_fraud_act": "the specific false statement or fraudulent act",
+  "material_fact_misrepresented": "which fact was misrepresented",
+  "benefit_or_admission_sought": "the immigration benefit or admission the subject was seeking",
+  "stated_lawful_admission": "a statement that the subject was lawfully admitted or paroled",
+  "no_prior_removal_stated": "a statement that the subject was never removed",
+  "truthful_disclosure_stated": "a statement that the subject made no misrepresentation"
+}

@@ -1,9 +1,9 @@
 {
-  "version": "1",
+  "version": "2",
   "model": "gpt-oss-20b",
-  "prompt_version": "v4",
+  "prompt_version": "v5",
   "votes": 1,
-  "disclaimer": "Flags missing documentation only. It does not judge the case or suggest charges. A person reviews every result.",
+  "disclaimer": "Flags missing or conflicting documentation only. It does not judge the case or suggest charges. A person reviews every result.",
   "sentences": {
     "S1": "INADMISSIBILITY: 'John Doe' a citizen of Mexico.",
     "S2": "He has never had any documents that would allow him to be, or remain, in the United States legally.",
@@ -11,19 +11,134 @@
     "S4": "INADMISSIBILITY: Subject is inadmissible under Section 212(A) (9) (A) (I) of the Immigration and Nationality Act, as amended, in that he was previously ordered removed and entered or attempted to enter without being admitted.",
     "S5": "REMOVABILITY: Subject is removable under Section 212 because he was found inadmissible as an arriving alien in proceedings under section 235(b)l of the Act."
   },
+  "i213": [
+    {
+      "block": "Family Name / First / Middle",
+      "stated": [
+        "subject_identity"
+      ],
+      "not_stated": [],
+      "sentence_ids": [
+        "S1"
+      ]
+    },
+    {
+      "block": "Country of Citizenship",
+      "stated": [
+        "country_of_citizenship"
+      ],
+      "not_stated": [],
+      "sentence_ids": [
+        "S1"
+      ]
+    },
+    {
+      "block": "Date, Place, Time, and Manner of Last Entry",
+      "stated": [
+        "manner_of_entry",
+        "reentry_or_attempted_reentry"
+      ],
+      "not_stated": [
+        "place_of_entry"
+      ],
+      "sentence_ids": [
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "block": "Status at Entry",
+      "stated": [
+        "admitted_or_paroled_status",
+        "admitted_status_at_reentry"
+      ],
+      "not_stated": [],
+      "sentence_ids": [
+        "S3",
+        "S4"
+      ]
+    },
+    {
+      "block": "Immigration Record",
+      "stated": [
+        "prior_removal_order"
+      ],
+      "not_stated": [
+        "prior_removal_date"
+      ],
+      "sentence_ids": [
+        "S4"
+      ]
+    },
+    {
+      "block": "Charge Code Word(s)",
+      "stated": [
+        "212(a)(6)(A)(i)",
+        "212(a)(9)(A)(i)"
+      ],
+      "not_stated": [],
+      "sentence_ids": [
+        "S3",
+        "S4"
+      ]
+    }
+  ],
   "seconds": 0.0,
+  "human_review": true,
+  "multiple_charges": [
+    "212(a)(6)(A)(i)",
+    "212(a)(9)(A)(i)"
+  ],
+  "flags": [
+    {
+      "type": "missing",
+      "charge": "212(a)(6)(A)(i)",
+      "fact_type": "place_of_entry",
+      "reason": "212(a)(6)(A)(i) (Present without admission or parole) requires where the subject entered (an approximate location such as \"near Brownsville, TX\" is enough). The narrative does not state it.",
+      "sentence_ids": [
+        "S3"
+      ]
+    },
+    {
+      "type": "missing",
+      "charge": "212(a)(9)(A)(i)",
+      "fact_type": "prior_removal_date",
+      "reason": "212(a)(9)(A)(i) (Prior removal, reentry without admission) requires the date of the prior removal order or removal. The narrative does not state it.",
+      "sentence_ids": [
+        "S4"
+      ]
+    },
+    {
+      "type": "multiple_charges",
+      "charge": null,
+      "fact_type": null,
+      "reason": "The narrative cites 2 charges (212(a)(6)(A)(i), 212(a)(9)(A)(i)). Multi-charge cases go to a person; each charge is still checked below.",
+      "sentence_ids": [
+        "S3",
+        "S4"
+      ]
+    }
+  ],
   "charges": [
     {
       "citation": "212(a)(6)(A)(i)",
       "name": "Present without admission or parole",
       "source": "INA 212(a)(6)(A)(i); USCIS Policy Manual Vol. 7, Part L, Ch. 3",
       "status": "gaps",
+      "cited_in": [
+        "S3"
+      ],
       "reason": null,
+      "citation_check": {
+        "result": "incomplete",
+        "reason": "1 of 5 facts that 212(a)(6)(A)(i) requires is not stated: where the subject entered (an approximate location such as \"near Brownsville, TX\" is enough)."
+      },
       "facts": [
         {
           "fact_type": "subject_identity",
           "label": "subject identity",
           "found": true,
+          "derived": false,
           "quote": "John Doe",
           "sentence_ids": [
             "S1"
@@ -34,6 +149,7 @@
           "fact_type": "country_of_citizenship",
           "label": "country of citizenship",
           "found": true,
+          "derived": false,
           "quote": "a citizen of Mexico",
           "sentence_ids": [
             "S1"
@@ -44,6 +160,7 @@
           "fact_type": "manner_of_entry",
           "label": "manner of entry",
           "found": true,
+          "derived": false,
           "quote": "entered the United States at a place not designated by the Attorney General",
           "sentence_ids": [
             "S3"
@@ -54,6 +171,7 @@
           "fact_type": "place_of_entry",
           "label": "place of entry",
           "found": false,
+          "derived": false,
           "quote": null,
           "sentence_ids": [],
           "confidence": null
@@ -62,6 +180,7 @@
           "fact_type": "admitted_or_paroled_status",
           "label": "admitted or paroled status",
           "found": true,
+          "derived": false,
           "quote": "was not then admitted or paroled",
           "sentence_ids": [
             "S3"
@@ -80,12 +199,20 @@
       "name": "Prior removal, reentry without admission",
       "source": "INA 212(a)(9)(A)(i); USCIS Policy Manual Vol. 7, Part L, Ch. 3",
       "status": "gaps",
+      "cited_in": [
+        "S4"
+      ],
       "reason": null,
+      "citation_check": {
+        "result": "incomplete",
+        "reason": "1 of 5 facts that 212(a)(9)(A)(i) requires is not stated: the date of the prior removal order or removal."
+      },
       "facts": [
         {
           "fact_type": "subject_identity",
           "label": "subject identity",
           "found": true,
+          "derived": false,
           "quote": "John Doe",
           "sentence_ids": [
             "S1"
@@ -96,6 +223,7 @@
           "fact_type": "prior_removal_order",
           "label": "prior removal order",
           "found": true,
+          "derived": false,
           "quote": "previously ordered removed",
           "sentence_ids": [
             "S4"
@@ -106,6 +234,7 @@
           "fact_type": "prior_removal_date",
           "label": "prior removal date",
           "found": false,
+          "derived": false,
           "quote": null,
           "sentence_ids": [],
           "confidence": null
@@ -114,6 +243,7 @@
           "fact_type": "reentry_or_attempted_reentry",
           "label": "reentry or attempted reentry",
           "found": true,
+          "derived": false,
           "quote": "entered or attempted to enter",
           "sentence_ids": [
             "S4"
@@ -124,6 +254,7 @@
           "fact_type": "admitted_status_at_reentry",
           "label": "admitted status at reentry",
           "found": true,
+          "derived": false,
           "quote": "without being admitted",
           "sentence_ids": [
             "S4"

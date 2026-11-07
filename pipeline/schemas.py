@@ -1,4 +1,17 @@
-"""Review result contract, version 1. backend/sample_report.json is a real example (from a stubbed model run).
+"""Review result contract, version 2. backend/sample_report.json is a real example (from a stubbed model run).
+
+Version 2 ADDS fields; every version 1 field is unchanged, so existing screens keep working:
+  top level   "human_review": true/false   (true if any charge needs a person, or several charges are cited)
+              "multiple_charges": [citations] or null
+              "i213": [{"block", "stated", "not_stated", "sentence_ids"}]   # facts mapped to Form I-213 boxes (informational)
+              "flags": [{"type", "charge", "fact_type", "reason", "sentence_ids"}]   # every flag with a plain-language reason
+                 type = missing | conflict | unclear | inconsistency | unknown_charge | no_citation | multiple_charges | model_unavailable
+  per charge  "cited_in": ["S3"]   the sentence that cites the charge (missing-fact flags point here)
+              "citation_check": {"result", "reason"}
+                 result = supported | incomplete | likely_mismatch | needs_review | not_in_reference_table | no_citation | not_checked
+              facts[].derived: true when code (not the model) filled the fact in, e.g. admission status at reentry
+
+Version 1 contract:
 
 {
   "version": "1",
